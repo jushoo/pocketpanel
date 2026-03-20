@@ -1,0 +1,11 @@
+{
+  "name": "@pocketpanel/schema",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "generate": "json2ts -i schemas -o types || json-schema-to-typescript schemas/*.json types/"
+  },
+  "devDependencies": {
+    "json-schema-to-typescript": "^15.0.0"
+  }
+}
