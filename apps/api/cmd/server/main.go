@@ -23,6 +23,21 @@ func main() {
 		log.Fatalf("Failed to run migrations: %v", err)
 	}
 
+	// Create default admin account if it doesn't exist
+	password, err := database.CreateDefaultAdmin(db)
+	if err != nil {
+		log.Fatalf("Failed to create default admin: %v", err)
+	}
+	if password != "" {
+		log.Printf("=================================================")
+		log.Printf("Default admin account created!")
+		log.Printf("Username: admin")
+		log.Printf("Password: %s", password)
+		log.Printf("=================================================")
+	} else {
+		log.Println("Admin account already exists")
+	}
+
 	app := server.New(cfg, db)
 
 	log.Printf("Server starting on http://localhost%s", cfg.Port)

@@ -52,7 +52,6 @@ make dev-web   # Svelte dev server on http://localhost:3000
 
 ### Authentication
 
-- `POST /api/v1/auth/register` - Register new user
 - `POST /api/v1/auth/login` - Login with username/password
 - `POST /api/v1/auth/logout` - Logout
 - `GET /api/v1/me` - Get current user (requires auth)
