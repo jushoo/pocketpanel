@@ -1,13 +1,19 @@
 # PocketPanel
 
-A lightweight admin panel built with Svelte 5 + Vite (frontend) and Go + Fiber (backend).
+A lightweight admin panel built with SvelteKit (frontend) and Go + Fiber (backend).
 
 ## Architecture
 
 ```
 pocketpanel/
 ├── apps/
-│   ├── web/              # Svelte 5 + Vite (Port 3000)
+│   ├── web/              # SvelteKit (Port 3000)
+│   │   ├── src/
+│   │   │   ├── routes/   # SvelteKit file-based routing
+│   │   │   ├── lib/      # Shared components & utilities
+│   │   │   └── app.html  # HTML template
+│   │   ├── static/       # Static assets
+│   │   └── svelte.config.js
 │   └── api/              # Go 1.26 + Fiber (Port 3001)
 ├── packages/
 │   └── schema/           # JSON Schemas for shared types
@@ -80,10 +86,13 @@ The app uses session-based authentication with HTTP-only cookies. On login, a se
 ## Tech Stack
 
 **Frontend:**
+- SvelteKit 2
 - Svelte 5 (Runes)
-- Vite 6
+- @sveltejs/adapter-static
+- Vite 7
 - TypeScript
 - Vitest for testing
+- Tailwind CSS 4
 
 **Backend:**
 - Go 1.26
