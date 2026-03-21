@@ -31,9 +31,7 @@ type LoginRequest struct {
 func (h *AuthHandler) Register(c fiber.Ctx) error {
 	var req RegisterRequest
 	if err := c.Bind().Body(&req); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "Invalid request body",
-		})
+		return err // Error handled by customErrorHandler
 	}
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
@@ -70,9 +68,7 @@ func (h *AuthHandler) Register(c fiber.Ctx) error {
 func (h *AuthHandler) Login(c fiber.Ctx) error {
 	var req LoginRequest
 	if err := c.Bind().Body(&req); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "Invalid request body",
-		})
+		return err // Error handled by customErrorHandler
 	}
 
 	var user models.User
