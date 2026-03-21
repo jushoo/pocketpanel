@@ -2,27 +2,10 @@
 	import { Button } from "$lib/components/ui/button";
 	import { Input } from "$lib/components/ui/input";
 	import { Label } from "$lib/components/ui/label";
-
-	let username = $state("");
-	let password = $state("");
+	import { enhance } from "$app/forms";
+	
+	let { form } = $props();
 	let loading = $state(false);
-	let error = $state("");
-
-	async function handleSubmit(e: Event) {
-		e.preventDefault();
-		error = "";
-		loading = true;
-
-		await new Promise((resolve) => setTimeout(resolve, 1000));
-		
-		if (username && password) {
-			console.log("Login attempted", { username });
-		} else {
-			error = "Please enter both username and password";
-		}
-		
-		loading = false;
-	}
 </script>
 
 <div class="min-h-screen w-full flex items-center justify-center bg-background">
@@ -44,15 +27,22 @@
 			<p class="mt-2 text-sm text-muted-foreground">Admin Login</p>
 		</div>
 
-		<form onsubmit={handleSubmit} class="space-y-5">
+		<form method="POST" action="?/login" use:enhance={() => {
+			loading = true;
+			return async ({ update }) => {
+				await update();
+				loading = false;
+			};
+		}} class="space-y-5">
 			<div class="space-y-2">
 				<Label for="username" class="text-sm font-normal text-muted-foreground">Username</Label>
 				<Input
 					id="username"
+					name="username"
 					type="text"
 					placeholder="admin"
-					bind:value={username}
 					class="h-11"
+					required
 				/>
 			</div>
 
@@ -60,15 +50,16 @@
 				<Label for="password" class="text-sm font-normal text-muted-foreground">Password</Label>
 				<Input
 					id="password"
+					name="password"
 					type="password"
 					placeholder="••••••••"
-					bind:value={password}
 					class="h-11"
+					required
 				/>
 			</div>
 
-			{#if error}
-				<p class="text-sm text-destructive">{error}</p>
+			{#if form?.error}
+				<p class="text-sm text-destructive">{form.error}</p>
 			{/if}
 
 			<Button
