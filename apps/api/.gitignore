@@ -1,5 +1,6 @@
 .air.toml
 bin/
+tmp/
 *.db
 .env
 vendor/

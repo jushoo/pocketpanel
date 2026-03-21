@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "skills": {
+    "frontend-design": {
+      "source": "smithery.ai",
+      "sourceType": "well-known",
+      "computedHash": "3033a2783a6ba7054800c7b45614fcdf44d6ab4d3c1ba53d8f6034bd92bd8016"
+    },
+    "svelte-expert": {
+      "source": "smithery.ai",
+      "sourceType": "well-known",
+      "computedHash": "a264d8b06cd148eaff0310f4e3ee75ddfba62526460982580541a70c8ed872e4"
+    }
+  }
+}
