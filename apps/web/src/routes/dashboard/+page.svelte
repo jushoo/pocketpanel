@@ -57,7 +57,7 @@
 					<CardDescription>Create your first Minecraft server to get started</CardDescription>
 				</CardHeader>
 				<CardContent>
-					<Button class="w-full" size="lg">
+					<Button class="w-full" size="lg" href="/dashboard/servers/new">
 						<Plus class="mr-2 h-4 w-4" />
 						Create Server
 					</Button>
