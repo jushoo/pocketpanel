@@ -25,8 +25,9 @@ Available components can be found at https://shadcn-svelte.com
 ## UI Design Principles
 
 Design UIs that are:
+
 - **Clean** - Minimal visual noise, generous whitespace
-- **Minimal** - Only essential elements, no decorative fluff  
+- **Minimal** - Only essential elements, no decorative fluff
 - **Basic** - Simple layouts, straightforward interactions
 - **Ollama-style** - Centered content, subtle borders, muted text hierarchy
 
@@ -34,22 +35,22 @@ Design UIs that are:
 
 ```svelte
 <!-- Good: Uses theme variables, clean layout -->
-<div class="min-h-screen flex items-center justify-center bg-background">
-  <div class="w-full max-w-sm px-6">
-    <h1 class="text-xl font-medium text-foreground">Title</h1>
-    <p class="text-sm text-muted-foreground">Subtitle</p>
-    <Input class="h-11" />
-    <Button class="w-full">Action</Button>
-  </div>
+<div class="flex min-h-screen items-center justify-center bg-background">
+	<div class="w-full max-w-sm px-6">
+		<h1 class="text-xl font-medium text-foreground">Title</h1>
+		<p class="text-sm text-muted-foreground">Subtitle</p>
+		<Input class="h-11" />
+		<Button class="w-full">Action</Button>
+	</div>
 </div>
 ```
 
 ```svelte
 <!-- Bad: Hardcoded colors, custom styling overrides -->
 <div class="min-h-screen bg-[#0d0d0d]">
-  <h1 class="text-white/90">Title</h1>
-  <Input class="bg-white/[0.03] border-white/10 text-white/90" />
-  <Button class="bg-white/90 text-black">Action</Button>
+	<h1 class="text-white/90">Title</h1>
+	<Input class="border-white/10 bg-white/[0.03] text-white/90" />
+	<Button class="bg-white/90 text-black">Action</Button>
 </div>
 ```
 

@@ -40,7 +40,7 @@ export const actions: Actions = {
 					const sessionId = sessionMatch[1];
 					const maxAgeMatch = setCookieHeader.match(/Max-Age=(\d+)/);
 					const maxAge = maxAgeMatch ? parseInt(maxAgeMatch[1]) : 24 * 60 * 60;
-					
+
 					cookies.set('session_id', sessionId, {
 						path: '/',
 						httpOnly: true,
@@ -57,7 +57,7 @@ export const actions: Actions = {
 			if (isRedirect(error)) {
 				throw error;
 			}
-			
+
 			console.error('Login error:', error);
 			return fail(500, {
 				error: 'An error occurred during login'
