@@ -4,11 +4,11 @@ import (
 	"strings"
 	"time"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v3"
 	"github.com/gofiber/fiber/v3/middleware/cors"
 	"github.com/gofiber/fiber/v3/middleware/logger"
 	"github.com/gofiber/fiber/v3/middleware/session"
-	"github.com/go-playground/validator/v10"
 	"gorm.io/gorm"
 
 	"pocketpanel/api/internal/config"
@@ -19,12 +19,12 @@ import (
 
 func New(cfg *config.Config, db *gorm.DB) *fiber.App {
 	app := fiber.New(fiber.Config{
-		AppName:      "PocketPanel API",
-		ReadTimeout:  10 * time.Second,
-		WriteTimeout: 10 * time.Second,
-		BodyLimit:    4 * 1024 * 1024, // 4MB
+		AppName:         "PocketPanel API",
+		ReadTimeout:     10 * time.Second,
+		WriteTimeout:    10 * time.Second,
+		BodyLimit:       4 * 1024 * 1024, // 4MB
 		StructValidator: validatormiddleware.New(),
-		ErrorHandler: customErrorHandler,
+		ErrorHandler:    customErrorHandler,
 	})
 
 	// Session store
@@ -50,6 +50,9 @@ func New(cfg *config.Config, db *gorm.DB) *fiber.App {
 	api.Post("/auth/register", authHandler.Register)
 	api.Post("/auth/login", authHandler.Login)
 	api.Post("/auth/logout", authHandler.Logout)
+
+	serverHandler := handlers.NewServerHandler(db)
+	api.Post("/servers", serverHandler.Create)
 
 	protected := api.Group("/", middleware.Auth(sessionStore))
 	protected.Get("/me", authHandler.Me)
@@ -90,5 +93,5 @@ func customErrorHandler(c fiber.Ctx, err error) error {
 		})
 	}
 
-	return c.Next()
+	return nil
 }

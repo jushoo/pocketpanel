@@ -90,6 +90,7 @@ func TestCreateServerRequestValidation(t *testing.T) {
 				Version: "1.20.4",
 				MinMem:  2,
 				MaxMem:  4,
+				Port:    25565,
 			},
 			wantErr: false,
 		},
@@ -149,7 +150,7 @@ func TestCreateServerRequestValidation(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name: "port is optional (zero)",
+			name: "port is zero",
 			req: CreateServerRequest{
 				Name:    "myserver",
 				Type:    models.ServerTypeVanilla,
@@ -158,7 +159,43 @@ func TestCreateServerRequestValidation(t *testing.T) {
 				MaxMem:  4,
 				Port:    0,
 			},
+			wantErr: true,
+		},
+		{
+			name: "port below minimum",
+			req: CreateServerRequest{
+				Name:    "myserver",
+				Type:    models.ServerTypeVanilla,
+				Version: "1.20.4",
+				MinMem:  2,
+				MaxMem:  4,
+				Port:    25564,
+			},
+			wantErr: true,
+		},
+		{
+			name: "port at minimum",
+			req: CreateServerRequest{
+				Name:    "myserver",
+				Type:    models.ServerTypeVanilla,
+				Version: "1.20.4",
+				MinMem:  2,
+				MaxMem:  4,
+				Port:    25565,
+			},
 			wantErr: false,
+		},
+		{
+			name: "port above maximum",
+			req: CreateServerRequest{
+				Name:    "myserver",
+				Type:    models.ServerTypeVanilla,
+				Version: "1.20.4",
+				MinMem:  2,
+				MaxMem:  4,
+				Port:    65536,
+			},
+			wantErr: true,
 		},
 	}
 

@@ -4,7 +4,6 @@ import (
 	"strings"
 
 	"github.com/gofiber/fiber/v3"
-	"github.com/gofiber/fiber/v3/middleware/session"
 	"gorm.io/gorm"
 
 	"pocketpanel/api/internal/models"
@@ -12,8 +11,11 @@ import (
 
 // ServerHandler handles server-related HTTP requests.
 type ServerHandler struct {
-	db    *gorm.DB
-	store *session.Store
+	db *gorm.DB
+}
+
+func NewServerHandler(db *gorm.DB) *ServerHandler {
+	return &ServerHandler{db: db}
 }
 
 // CreateServerRequest represents the request body for creating a server.
@@ -23,7 +25,7 @@ type CreateServerRequest struct {
 	Version string            `json:"version" validate:"required"`
 	MinMem  uint              `json:"min_mem" validate:"required,min=1,max=128"`
 	MaxMem  uint              `json:"max_mem" validate:"required,min=1,max=128"`
-	Port    uint              `json:"port"`
+	Port    uint              `json:"port" validate:"required,min=25565,max=65535"`
 }
 
 // Create handles POST /api/v1/servers
@@ -31,6 +33,12 @@ func (h *ServerHandler) Create(c fiber.Ctx) error {
 	var req CreateServerRequest
 	if err := c.Bind().Body(&req); err != nil {
 		return err // Error handled by customErrorHandler
+	}
+
+	if req.MinMem > req.MaxMem {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "min_mem cannot be greater than max_mem",
+		})
 	}
 
 	server := models.Server{
