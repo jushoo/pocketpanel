@@ -30,11 +30,6 @@ func New(cfg *config.Config, db *gorm.DB) *fiber.App {
 		CookieSameSite:  "Lax",
 	})
 
-	// Session middleware
-	app.Use(session.New(session.Config{
-		Store: sessionStore,
-	}))
-
 	app.Use(logger.New())
 
 	app.Use(cors.New(cors.Config{

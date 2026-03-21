@@ -91,7 +91,7 @@ func (h *AuthHandler) Login(c fiber.Ctx) error {
 	sess, err := h.store.Get(c)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": "Session error",
+			"error": "Session error: " + err.Error(),
 		})
 	}
 
