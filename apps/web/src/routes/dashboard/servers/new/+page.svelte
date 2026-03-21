@@ -9,6 +9,7 @@
 		CardHeader,
 		CardTitle
 	} from '$lib/components/ui/card';
+	import { Select, SelectContent, SelectItem, SelectTrigger } from '$lib/components/ui/select';
 	import { enhance } from '$app/forms';
 	import { Boxes, Info, ArrowLeft } from '@lucide/svelte';
 	import type { ServerType } from './+page.server';
@@ -115,18 +116,21 @@
 								Server Type
 								<span class="text-destructive">*</span>
 							</Label>
-							<select
-								id="serverType"
-								name="serverType"
-								bind:value={selectedTypeId}
-								class="h-11 w-full rounded-4xl border border-input bg-input/30 px-3 py-1 text-base transition-colors outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 md:text-sm"
-								required
-							>
-								<option value="" disabled selected>Choose a server type</option>
-								{#each data.serverTypes as type (type.id)}
-									<option value={type.id}>{type.name}</option>
-								{/each}
-							</select>
+							<input type="hidden" name="serverType" value={selectedTypeId} />
+							<Select type="single" bind:value={selectedTypeId} required>
+								<SelectTrigger class="w-full">
+									{#if selectedType}
+										{selectedType.name}
+									{:else}
+										<span class="text-muted-foreground">Choose a server type</span>
+									{/if}
+								</SelectTrigger>
+								<SelectContent>
+									{#each data.serverTypes as type (type.id)}
+										<SelectItem value={type.id} label={type.name} />
+									{/each}
+								</SelectContent>
+							</Select>
 							{#if selectedType}
 								<p class="text-xs text-muted-foreground">{selectedType.description}</p>
 							{/if}
@@ -138,21 +142,32 @@
 								Server Version
 								<span class="text-destructive">*</span>
 							</Label>
-							<select
-								id="version"
-								name="version"
+							<input type="hidden" name="version" value={form?.values?.version || ''} />
+							<Select
+								type="single"
 								value={form?.values?.version || ''}
-								class="h-11 w-full rounded-4xl border border-input bg-input/30 px-3 py-1 text-base transition-colors outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 md:text-sm"
-								required
+								onValueChange={(v) => {
+									const input = document.getElementById('version-input') as HTMLInputElement;
+									if (input) input.value = v;
+								}}
 								disabled={!selectedType}
+								required
 							>
-								<option value="" disabled selected>
-									{selectedType ? 'Choose a version' : 'Select a server type first'}
-								</option>
-								{#each availableVersions as version (version)}
-									<option value={version}>{version}</option>
-								{/each}
-							</select>
+								<SelectTrigger class="w-full">
+									{#if form?.values?.version}
+										{form.values.version}
+									{:else}
+										<span class="text-muted-foreground">
+											{selectedType ? 'Choose a version' : 'Select a server type first'}
+										</span>
+									{/if}
+								</SelectTrigger>
+								<SelectContent>
+									{#each availableVersions as version (version)}
+										<SelectItem value={version} label={version} />
+									{/each}
+								</SelectContent>
+							</Select>
 						</div>
 
 						<!-- Divider -->
