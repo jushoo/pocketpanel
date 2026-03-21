@@ -141,6 +141,7 @@
 							<select
 								id="version"
 								name="version"
+								value={form?.values?.version || ''}
 								class="h-11 w-full rounded-4xl border border-input bg-input/30 px-3 py-1 text-base transition-colors outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 md:text-sm"
 								required
 								disabled={!selectedType}
@@ -197,6 +198,7 @@
 										type="number"
 										placeholder="4"
 										min={1}
+										max={128}
 										value={form?.values?.maxMemory || '4'}
 										class="h-11"
 									/>

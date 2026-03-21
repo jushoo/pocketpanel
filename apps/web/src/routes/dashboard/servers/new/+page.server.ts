@@ -1,6 +1,7 @@
 import { fail, redirect, isRedirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 
+// TODO: Remove this disable comment when uncommenting the API call below
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const API_URL = process.env.API_URL || 'http://localhost:3001';
 
@@ -67,8 +68,15 @@ export const load: PageServerLoad = async ({ locals }) => {
 
 export const actions: Actions = {
 	create: async ({ request, cookies }) => {
-		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		const sessionCookie = cookies.get('session_id');
+
+		if (!sessionCookie) {
+			return fail(401, {
+				error: 'Authentication required',
+				values: {}
+			});
+		}
+
 		const data = await request.formData();
 
 		const name = data.get('name') as string;
@@ -132,6 +140,13 @@ export const actions: Actions = {
 		if (isNaN(maxMemNum) || maxMemNum < minMemNum) {
 			return fail(400, {
 				error: 'Maximum memory must be greater than or equal to minimum memory',
+				values: { name, serverType, version, port, minMemory, maxMemory }
+			});
+		}
+
+		if (maxMemNum > 128) {
+			return fail(400, {
+				error: 'Maximum memory cannot exceed 128 GB',
 				values: { name, serverType, version, port, minMemory, maxMemory }
 			});
 		}
