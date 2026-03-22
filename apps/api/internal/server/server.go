@@ -54,6 +54,7 @@ func New(cfg *config.Config, db *gorm.DB) *fiber.App {
 	serverHandler := handlers.NewServerHandler(db)
 	api.Post("/servers", serverHandler.Create)
 	api.Get("/servers", serverHandler.List)
+	api.Get("/servers/:id", serverHandler.Get)
 
 	versionsHandler := handlers.NewVersionsHandler(db)
 	api.Get("/versions/:type", versionsHandler.GetVersions)

@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"errors"
 	"strings"
 
 	"github.com/gofiber/fiber/v3"
@@ -93,4 +94,23 @@ func (h *ServerHandler) List(c fiber.Ctx) error {
 	}
 
 	return c.JSON(servers)
+}
+
+// Get handles GET /api/v1/servers/:id
+func (h *ServerHandler) Get(c fiber.Ctx) error {
+	id := c.Params("id")
+
+	var server models.Server
+	if err := h.db.First(&server, id).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+				"error": "Server not found",
+			})
+		}
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to fetch server",
+		})
+	}
+
+	return c.JSON(server)
 }
