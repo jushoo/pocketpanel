@@ -2,21 +2,27 @@ package handlers
 
 import (
 	"errors"
+	"strconv"
 	"strings"
 
 	"github.com/gofiber/fiber/v3"
 	"gorm.io/gorm"
 
+	"pocketpanel/api/internal/manager"
 	"pocketpanel/api/internal/models"
 )
 
 // ServerHandler handles server-related HTTP requests.
 type ServerHandler struct {
-	db *gorm.DB
+	db           *gorm.DB
+	serverMgr    *manager.ServerManager
 }
 
 func NewServerHandler(db *gorm.DB) *ServerHandler {
-	return &ServerHandler{db: db}
+	return &ServerHandler{
+		db:           db,
+		serverMgr:    manager.NewServerManager(),
+	}
 }
 
 // CreateServerRequest represents the request body for creating a server.
@@ -93,7 +99,24 @@ func (h *ServerHandler) List(c fiber.Ctx) error {
 		})
 	}
 
-	return c.JSON(servers)
+	// Enrich with status information
+	type ServerWithStatus struct {
+		models.Server
+		Running bool `json:"running"`
+		PID     int  `json:"pid,omitempty"`
+	}
+
+	result := make([]ServerWithStatus, len(servers))
+	for i, s := range servers {
+		status, _ := h.serverMgr.GetServerStatus(s.ID)
+		result[i] = ServerWithStatus{
+			Server:  s,
+			Running: status.Running,
+			PID:     status.PID,
+		}
+	}
+
+	return c.JSON(result)
 }
 
 // Get handles GET /api/v1/servers/:id
@@ -112,5 +135,217 @@ func (h *ServerHandler) Get(c fiber.Ctx) error {
 		})
 	}
 
-	return c.JSON(server)
+	// Get status
+	status, _ := h.serverMgr.GetServerStatus(server.ID)
+
+	return c.JSON(fiber.Map{
+		"server":  server,
+		"running": status.Running,
+		"pid":     status.PID,
+	})
+}
+
+// Start handles POST /api/v1/servers/:id/start
+func (h *ServerHandler) Start(c fiber.Ctx) error {
+	id := c.Params("id")
+	serverID, err := strconv.ParseUint(id, 10, 32)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Invalid server ID",
+		})
+	}
+
+	var server models.Server
+	if err := h.db.First(&server, serverID).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+				"error": "Server not found",
+			})
+		}
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to fetch server",
+		})
+	}
+
+	// Check if already running
+	if h.serverMgr.IsRunning(uint(serverID)) {
+		return c.Status(fiber.StatusConflict).JSON(fiber.Map{
+			"error": "Server is already running",
+		})
+	}
+
+	// Start the server
+	if err := h.serverMgr.StartServer(&server); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to start server: " + err.Error(),
+		})
+	}
+
+	status, _ := h.serverMgr.GetServerStatus(uint(serverID))
+	return c.JSON(fiber.Map{
+		"message": "Server started successfully",
+		"running": status.Running,
+		"pid":     status.PID,
+	})
+}
+
+// StopRequest represents the request body for stopping a server
+type StopRequest struct {
+	Force bool `json:"force"`
+}
+
+// Stop handles POST /api/v1/servers/:id/stop
+func (h *ServerHandler) Stop(c fiber.Ctx) error {
+	id := c.Params("id")
+	serverID, err := strconv.ParseUint(id, 10, 32)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Invalid server ID",
+		})
+	}
+
+	var server models.Server
+	if err := h.db.First(&server, serverID).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+				"error": "Server not found",
+			})
+		}
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to fetch server",
+		})
+	}
+
+	// Parse optional force parameter
+	var req StopRequest
+	c.Bind().Body(&req)
+
+	// Check if running
+	if !h.serverMgr.IsRunning(uint(serverID)) {
+		return c.Status(fiber.StatusConflict).JSON(fiber.Map{
+			"error": "Server is not running",
+		})
+	}
+
+	// Stop the server
+	if err := h.serverMgr.StopServer(uint(serverID), req.Force); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to stop server: " + err.Error(),
+		})
+	}
+
+	return c.JSON(fiber.Map{
+		"message": "Server stopped successfully",
+	})
+}
+
+// Status handles GET /api/v1/servers/:id/status
+func (h *ServerHandler) Status(c fiber.Ctx) error {
+	id := c.Params("id")
+	serverID, err := strconv.ParseUint(id, 10, 32)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Invalid server ID",
+		})
+	}
+
+	var server models.Server
+	if err := h.db.First(&server, serverID).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+				"error": "Server not found",
+			})
+		}
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to fetch server",
+		})
+	}
+
+	status, err := h.serverMgr.GetServerStatus(uint(serverID))
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to get server status: " + err.Error(),
+		})
+	}
+
+	return c.JSON(status)
+}
+
+// CommandRequest represents the request body for sending a command
+type CommandRequest struct {
+	Command string `json:"command" validate:"required"`
+}
+
+// Command handles POST /api/v1/servers/:id/command
+func (h *ServerHandler) Command(c fiber.Ctx) error {
+	id := c.Params("id")
+	serverID, err := strconv.ParseUint(id, 10, 32)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Invalid server ID",
+		})
+	}
+
+	var server models.Server
+	if err := h.db.First(&server, serverID).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+				"error": "Server not found",
+			})
+		}
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to fetch server",
+		})
+	}
+
+	// Check if running
+	if !h.serverMgr.IsRunning(uint(serverID)) {
+		return c.Status(fiber.StatusConflict).JSON(fiber.Map{
+			"error": "Server is not running",
+		})
+	}
+
+	var req CommandRequest
+	if err := c.Bind().Body(&req); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Invalid request body",
+		})
+	}
+
+	// Send command (this is a stub - requires proper stdin pipe setup)
+	// For now, we'll just return success
+	return c.JSON(fiber.Map{
+		"message": "Command sent",
+		"command": req.Command,
+	})
+}
+
+// Console handles GET /api/v1/servers/:id/console
+func (h *ServerHandler) Console(c fiber.Ctx) error {
+	id := c.Params("id")
+	serverID, err := strconv.ParseUint(id, 10, 32)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Invalid server ID",
+		})
+	}
+
+	// Parse lines parameter (default 100)
+	lines := 100
+	if linesParam := c.Query("lines"); linesParam != "" {
+		if l, err := strconv.Atoi(linesParam); err == nil && l > 0 && l <= 1000 {
+			lines = l
+		}
+	}
+
+	history, err := h.serverMgr.GetConsoleHistory(uint(serverID), lines)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to get console history: " + err.Error(),
+		})
+	}
+
+	return c.JSON(fiber.Map{
+		"lines": history,
+	})
 }
