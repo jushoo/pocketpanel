@@ -35,8 +35,8 @@
 		try {
 			const response = await fetch(`/api/proxy/servers/${data.server.id}/console?lines=50`);
 			if (response.ok) {
-				const data = await response.json();
-				consoleLines = data.lines || [];
+				const result = await response.json();
+				consoleLines = result.lines || [];
 			}
 		} catch {
 			// Ignore errors
@@ -86,14 +86,16 @@
 						method="POST"
 						action="?/stop"
 						use:enhance={() => {
+							console.log('[DEBUG] Stop form submitting...');
 							stopping = true;
-							return async ({ update }) => {
+							return async ({ update, result }) => {
+								console.log('[DEBUG] Stop result:', result);
 								await update();
 								stopping = false;
 							};
 						}}
 					>
-						<Button variant="outline" size="sm" disabled={stopping}>
+						<Button type="submit" variant="outline" size="sm" disabled={stopping}>
 							{#if stopping}
 								<Loader2 class="mr-2 h-4 w-4 animate-spin" />
 								Stopping...
@@ -107,15 +109,18 @@
 					<form
 						method="POST"
 						action="?/start"
+						onsubmit={(e) => console.log('[DEBUG] Start form submit event:', e)}
 						use:enhance={() => {
+							console.log('[DEBUG] Start form enhance triggered');
 							starting = true;
-							return async ({ update }) => {
+							return async ({ update, result }) => {
+								console.log('[DEBUG] Start result:', result);
 								await update();
 								starting = false;
 							};
 						}}
 					>
-						<Button size="sm" disabled={starting}>
+						<Button type="submit" size="sm" disabled={starting}>
 							{#if starting}
 								<Loader2 class="mr-2 h-4 w-4 animate-spin" />
 								Starting...

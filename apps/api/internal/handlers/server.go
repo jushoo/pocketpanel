@@ -30,8 +30,8 @@ type CreateServerRequest struct {
 	Name    string            `json:"name" validate:"required,min=3,max=50"`
 	Type    models.ServerType `json:"type" validate:"required,oneof=vanilla fabric"`
 	Version string            `json:"version" validate:"required"`
-	MinMem  uint              `json:"min_mem" validate:"required,min=1,max=128"`
-	MaxMem  uint              `json:"max_mem" validate:"required,min=1,max=128"`
+	MinMem  uint              `json:"min_mem" validate:"required,min=512,max=131072"`
+	MaxMem  uint              `json:"max_mem" validate:"required,min=512,max=131072"`
 	Port    uint              `json:"port" validate:"required,min=25565,max=65535"`
 }
 

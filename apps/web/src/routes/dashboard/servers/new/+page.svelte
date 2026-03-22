@@ -284,7 +284,7 @@
 
 						<!-- Memory Allocation -->
 						<div class="space-y-3">
-							<Label>Memory Allocation (GB)</Label>
+							<Label>Memory Allocation (MB)</Label>
 							<div class="grid grid-cols-2 gap-4">
 								<div class="space-y-2">
 									<Label for="minMemory" class="text-xs text-muted-foreground">Minimum</Label>
@@ -292,9 +292,9 @@
 										id="minMemory"
 										name="minMemory"
 										type="number"
-										placeholder="2"
-										min={1}
-										value={form?.values?.minMemory || '2'}
+										placeholder="2048"
+										min={512}
+										value={form?.values?.minMemory || '2048'}
 										class="h-11"
 									/>
 								</div>
@@ -304,10 +304,10 @@
 										id="maxMemory"
 										name="maxMemory"
 										type="number"
-										placeholder="4"
-										min={1}
-										max={128}
-										value={form?.values?.maxMemory || '4'}
+										placeholder="4096"
+										min={512}
+										max={131072}
+										value={form?.values?.maxMemory || '4096'}
 										class="h-11"
 									/>
 								</div>
