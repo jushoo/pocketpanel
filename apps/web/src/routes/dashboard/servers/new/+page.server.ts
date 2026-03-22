@@ -7,7 +7,6 @@ export interface ServerType {
 	id: string;
 	name: string;
 	description: string;
-	versions: string[];
 }
 
 export const load: PageServerLoad = async ({ locals }) => {
@@ -15,14 +14,12 @@ export const load: PageServerLoad = async ({ locals }) => {
 		{
 			id: 'vanilla',
 			name: 'Vanilla',
-			description: 'Official Minecraft server',
-			versions: ['1.21.4', '1.21.3', '1.21.1', '1.20.6', '1.20.4']
+			description: 'Official Minecraft server'
 		},
 		{
 			id: 'fabric',
 			name: 'Fabric',
-			description: 'Lightweight mod loader for Minecraft',
-			versions: ['1.21.4', '1.21.3', '1.21.1', '1.20.6', '1.20.4']
+			description: 'Lightweight mod loader for Minecraft'
 		}
 	];
 

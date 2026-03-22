@@ -11,8 +11,10 @@
 	} from '$lib/components/ui/card';
 	import { Select, SelectContent, SelectItem, SelectTrigger } from '$lib/components/ui/select';
 	import { enhance } from '$app/forms';
-	import { Boxes, Info, ArrowLeft } from '@lucide/svelte';
+	import { Boxes, Info, ArrowLeft, Loader2 } from '@lucide/svelte';
 	import type { ServerType } from './+page.server';
+
+	const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
 	let { data, form } = $props<{
 		data: { user: { username: string }; serverTypes: ServerType[] };
@@ -23,12 +25,42 @@
 	let selectedTypeId = $state(form?.values?.serverType || '');
 	let selectedVersion = $state(form?.values?.version || '');
 	let nameLength = $state((form?.values?.name || '').length);
+	let availableVersions = $state<string[]>([]);
+	let loadingVersions = $state(false);
+	let versionsError = $state('');
 
 	// Get the selected server type details
 	let selectedType = $derived(data.serverTypes.find((t: ServerType) => t.id === selectedTypeId));
 
-	// Get available versions for the selected type
-	let availableVersions = $derived(selectedType?.versions || []);
+	async function fetchVersions(typeId: string) {
+		if (!typeId) {
+			availableVersions = [];
+			return;
+		}
+
+		loadingVersions = true;
+		versionsError = '';
+		selectedVersion = '';
+
+		try {
+			const response = await fetch(`${API_URL}/api/v1/versions/${typeId}`);
+			if (!response.ok) {
+				const errorData = await response.json().catch(() => ({ error: 'Failed to fetch versions' }));
+				throw new Error(errorData.error || 'Failed to fetch versions');
+			}
+			const result = await response.json();
+			availableVersions = result.versions;
+		} catch (error) {
+			versionsError = error instanceof Error ? error.message : 'Failed to load versions';
+			availableVersions = [];
+		} finally {
+			loadingVersions = false;
+		}
+	}
+
+	function handleTypeChange() {
+		fetchVersions(selectedTypeId);
+	}
 
 	function handleNameInput(event: Event) {
 		const target = event.target as HTMLInputElement;
@@ -119,7 +151,7 @@
 								<span class="text-destructive">*</span>
 							</Label>
 							<input type="hidden" name="serverType" value={selectedTypeId} />
-							<Select type="single" bind:value={selectedTypeId} required>
+							<Select type="single" bind:value={selectedTypeId} onValueChange={handleTypeChange} required>
 								<SelectTrigger class="w-full">
 									{#if selectedType}
 										{selectedType.name}
@@ -145,9 +177,14 @@
 								<span class="text-destructive">*</span>
 							</Label>
 							<input type="hidden" name="version" bind:value={selectedVersion} />
-							<Select type="single" bind:value={selectedVersion} disabled={!selectedType} required>
+							<Select type="single" bind:value={selectedVersion} disabled={!selectedType || loadingVersions} required>
 								<SelectTrigger class="w-full">
-									{#if selectedVersion}
+									{#if loadingVersions}
+										<span class="flex items-center gap-2 text-muted-foreground">
+											<Loader2 class="h-4 w-4 animate-spin" />
+											Loading versions...
+										</span>
+									{:else if selectedVersion}
 										{selectedVersion}
 									{:else}
 										<span class="text-muted-foreground">
@@ -161,6 +198,9 @@
 									{/each}
 								</SelectContent>
 							</Select>
+							{#if versionsError}
+								<p class="text-xs text-destructive">{versionsError}</p>
+							{/if}
 						</div>
 
 						<!-- Divider -->
