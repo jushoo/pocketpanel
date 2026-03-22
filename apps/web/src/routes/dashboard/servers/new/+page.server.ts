@@ -1,8 +1,6 @@
 import { fail, redirect, isRedirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 
-// TODO: Remove this disable comment when uncommenting the API call below
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const API_URL = process.env.API_URL || 'http://localhost:3001';
 
 export interface ServerType {
@@ -13,8 +11,6 @@ export interface ServerType {
 }
 
 export const load: PageServerLoad = async ({ locals }) => {
-	// TODO: Fetch from API when endpoint is available
-	// For now, hardcode the server types as specified
 	const serverTypes: ServerType[] = [
 		{
 			id: 'vanilla',
@@ -23,39 +19,9 @@ export const load: PageServerLoad = async ({ locals }) => {
 			versions: ['1.21.4', '1.21.3', '1.21.1', '1.20.6', '1.20.4']
 		},
 		{
-			id: 'paper',
-			name: 'Paper',
-			description: 'High-performance Spigot fork with optimizations',
-			versions: ['1.21.4', '1.21.3', '1.21.1', '1.20.6', '1.20.4']
-		},
-		{
 			id: 'fabric',
 			name: 'Fabric',
 			description: 'Lightweight mod loader for Minecraft',
-			versions: ['1.21.4', '1.21.3', '1.21.1', '1.20.6', '1.20.4']
-		},
-		{
-			id: 'folia',
-			name: 'Folia',
-			description: 'Paper fork for large servers with regionized threading',
-			versions: ['1.21.4', '1.21.3', '1.21.1']
-		},
-		{
-			id: 'forge-installer',
-			name: 'Forge Installer',
-			description: 'Minecraft Forge mod loader (requires installation)',
-			versions: ['1.21.4', '1.21.3', '1.20.6', '1.20.4', '1.20.1']
-		},
-		{
-			id: 'neoforge-installer',
-			name: 'NeoForge Installer',
-			description: 'Modern Forge fork for modded Minecraft',
-			versions: ['1.21.4', '1.21.3', '1.21.1', '1.20.6']
-		},
-		{
-			id: 'purpur',
-			name: 'Purpur',
-			description: 'Paper fork with additional gameplay features',
 			versions: ['1.21.4', '1.21.3', '1.21.1', '1.20.6', '1.20.4']
 		}
 	];
@@ -151,44 +117,33 @@ export const actions: Actions = {
 			});
 		}
 
-		// TODO: Call backend API to create server when endpoint is available
-		// For now, just simulate success and redirect
-		console.log('Creating server:', {
-			name: name.trim(),
-			serverType,
-			version,
-			port: port ? parseInt(port, 10) : null,
-			minMemory: minMemNum,
-			maxMemory: maxMemNum
-		});
+		const serverPort = port ? parseInt(port, 10) : 25565;
 
 		try {
-			// TODO: Replace with actual API call
-			// const response = await fetch(`${API_URL}/api/v1/servers`, {
-			//     method: 'POST',
-			//     headers: {
-			//         'Content-Type': 'application/json',
-			//         'Cookie': `session_id=${sessionCookie}`
-			//     },
-			//     body: JSON.stringify({
-			//         name: name.trim(),
-			//         type: serverType,
-			//         version,
-			//         port: port ? parseInt(port, 10) : null,
-			//         minMemory: minMemNum,
-			//         maxMemory: maxMemNum
-			//     })
-			// });
-			//
-			// if (!response.ok) {
-			//     const errorData = await response.json().catch(() => ({ error: 'Failed to create server' }));
-			//     return fail(response.status, {
-			//         error: errorData.error || 'Failed to create server',
-			//         values: { name, serverType, version, port, minMemory, maxMemory }
-			//     });
-			// }
+			const response = await fetch(`${API_URL}/api/v1/servers`, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					Cookie: `session_id=${sessionCookie}`
+				},
+				body: JSON.stringify({
+					name: name.trim(),
+					type: serverType,
+					version,
+					port: serverPort,
+					min_mem: minMemNum,
+					max_mem: maxMemNum
+				})
+			});
 
-			// Successful creation - redirect to dashboard
+			if (!response.ok) {
+				const errorData = await response.json().catch(() => ({ error: 'Failed to create server' }));
+				return fail(response.status, {
+					error: errorData.error || 'Failed to create server',
+					values: { name, serverType, version, port, minMemory, maxMemory }
+				});
+			}
+
 			throw redirect(302, '/dashboard');
 		} catch (error) {
 			if (isRedirect(error)) {

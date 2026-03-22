@@ -21,6 +21,7 @@
 
 	let creating = $state(false);
 	let selectedTypeId = $state(form?.values?.serverType || '');
+	let selectedVersion = $state(form?.values?.version || '');
 	let nameLength = $state((form?.values?.name || '').length);
 
 	// Get the selected server type details
@@ -45,6 +46,7 @@
 				</Button>
 				<div>
 					<h1 class="text-xl font-medium text-foreground">Create Server</h1>
+					<p class="text-sm text-muted-foreground">Set up a new Minecraft server</p>
 				</div>
 			</div>
 			<div class="flex items-center gap-4">
@@ -142,20 +144,11 @@
 								Server Version
 								<span class="text-destructive">*</span>
 							</Label>
-							<input type="hidden" name="version" value={form?.values?.version || ''} />
-							<Select
-								type="single"
-								value={form?.values?.version || ''}
-								onValueChange={(v) => {
-									const input = document.getElementById('version-input') as HTMLInputElement;
-									if (input) input.value = v;
-								}}
-								disabled={!selectedType}
-								required
-							>
+							<input type="hidden" name="version" bind:value={selectedVersion} />
+							<Select type="single" bind:value={selectedVersion} disabled={!selectedType} required>
 								<SelectTrigger class="w-full">
-									{#if form?.values?.version}
-										{form.values.version}
+									{#if selectedVersion}
+										{selectedVersion}
 									{:else}
 										<span class="text-muted-foreground">
 											{selectedType ? 'Choose a version' : 'Select a server type first'}

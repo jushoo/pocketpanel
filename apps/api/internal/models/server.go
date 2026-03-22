@@ -20,7 +20,7 @@ type Server struct {
 	Version   string         `json:"version" gorm:"not null"`
 	MinMem    uint           `json:"min_mem" gorm:"not null"`
 	MaxMem    uint           `json:"max_mem" gorm:"not null"`
-	Port      uint           `json:"port" gorm:"not null"`
+	Port      uint           `json:"port" gorm:"uniqueIndex;not null"`
 	CreatedAt time.Time      `json:"created_at"`
 	UpdatedAt time.Time      `json:"updated_at"`
 	DeletedAt gorm.DeletedAt `json:"-" gorm:"index"`

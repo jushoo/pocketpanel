@@ -52,6 +52,12 @@ func (h *ServerHandler) Create(c fiber.Ctx) error {
 
 	if err := h.db.Create(&server).Error; err != nil {
 		if isUniqueViolation(err) {
+			errMsg := err.Error()
+			if strings.Contains(errMsg, "port") {
+				return c.Status(fiber.StatusConflict).JSON(fiber.Map{
+					"error": "A server is already using this port",
+				})
+			}
 			return c.Status(fiber.StatusConflict).JSON(fiber.Map{
 				"error": "Server with this name already exists",
 			})
@@ -75,4 +81,16 @@ func isUniqueViolation(err error) bool {
 	return strings.Contains(msg, "UNIQUE constraint failed") ||
 		strings.Contains(msg, "duplicate key value") ||
 		strings.Contains(msg, "Error 1062: Duplicate entry")
+}
+
+// List handles GET /api/v1/servers
+func (h *ServerHandler) List(c fiber.Ctx) error {
+	var servers []models.Server
+	if err := h.db.Find(&servers).Error; err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to fetch servers",
+		})
+	}
+
+	return c.JSON(servers)
 }

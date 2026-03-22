@@ -53,6 +53,7 @@ func New(cfg *config.Config, db *gorm.DB) *fiber.App {
 
 	serverHandler := handlers.NewServerHandler(db)
 	api.Post("/servers", serverHandler.Create)
+	api.Get("/servers", serverHandler.List)
 
 	protected := api.Group("/", middleware.Auth(sessionStore))
 	protected.Get("/me", authHandler.Me)
