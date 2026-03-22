@@ -7,8 +7,11 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"sync"
 	"time"
+
+	"pocketpanel/api/internal/sync/vanilla"
+
+	stdlib_sync "sync"
 )
 
 // ConsoleProvider defines the interface for console output streaming
@@ -23,7 +26,7 @@ type ConsoleProvider interface {
 
 // FileConsoleProvider implements ConsoleProvider using file-based logging
 type FileConsoleProvider struct {
-	mu       sync.RWMutex
+	mu       stdlib_sync.RWMutex
 	subs     map[uint][]chan string
 	stopChan map[uint]chan struct{}
 }
@@ -117,7 +120,7 @@ func (fcp *FileConsoleProvider) GetHistory(serverID uint, lines int) ([]string, 
 }
 
 func (fcp *FileConsoleProvider) getLogPath(serverID uint) string {
-	jarMgr := NewJARManager("")
+	jarMgr := NewJARManager("", vanilla.NewMojangDownloader())
 	serverDir := jarMgr.GetServerDir(serverID)
 	return filepath.Join(serverDir, ConsoleLogName)
 }
@@ -137,7 +140,7 @@ func (fcp *FileConsoleProvider) tailLog(serverID uint, ch chan string, logPath s
 	file.Seek(0, io.SeekEnd)
 
 	reader := bufio.NewReader(file)
-	
+
 	// Get stop channel
 	fcp.mu.RLock()
 	stopCh := fcp.stopChan[serverID]
@@ -185,7 +188,7 @@ type ServerConsole struct {
 func NewServerConsole() *ServerConsole {
 	return &ServerConsole{
 		processMgr: NewProcessManager(),
-		jarMgr:     NewJARManager(""),
+		jarMgr:     NewJARManager("", vanilla.NewMojangDownloader()),
 		console:    NewFileConsoleProvider(),
 	}
 }

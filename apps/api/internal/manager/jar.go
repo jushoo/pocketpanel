@@ -18,17 +18,17 @@ const (
 // JARManager handles downloading and caching server JARs.
 type JARManager struct {
 	basePath   string
-	fetcher    *sync.MojangFetcher
+	downloader sync.JARDownloader
 }
 
-// NewJARManager creates a new JARManager.
-func NewJARManager(basePath string) *JARManager {
+// NewJARManager creates a new JARManager with the specified downloader.
+func NewJARManager(basePath string, downloader sync.JARDownloader) *JARManager {
 	if basePath == "" {
 		basePath = BasePath
 	}
 	return &JARManager{
-		basePath: basePath,
-		fetcher:  sync.NewMojangFetcher(),
+		basePath:   basePath,
+		downloader: downloader,
 	}
 }
 
@@ -74,7 +74,7 @@ func (j *JARManager) DownloadIfMissing(serverID uint, version string) error {
 	}
 
 	// Download the JAR
-	if err := j.fetcher.DownloadJAR(version, jarPath); err != nil {
+	if err := j.downloader.DownloadJAR(version, jarPath); err != nil {
 		return fmt.Errorf("failed to download JAR for version %s: %w", version, err)
 	}
 
@@ -92,7 +92,7 @@ func (j *JARManager) Download(serverID uint, version string) error {
 	jarPath := j.GetServerJARPath(serverID)
 
 	// Download the JAR
-	if err := j.fetcher.DownloadJAR(version, jarPath); err != nil {
+	if err := j.downloader.DownloadJAR(version, jarPath); err != nil {
 		return fmt.Errorf("failed to download JAR for version %s: %w", version, err)
 	}
 

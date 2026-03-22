@@ -4,6 +4,9 @@ import (
 	"fmt"
 
 	"pocketpanel/api/internal/models"
+	"pocketpanel/api/internal/sync"
+	"pocketpanel/api/internal/sync/fabric"
+	"pocketpanel/api/internal/sync/vanilla"
 )
 
 // ServerManager orchestrates all server-related operations
@@ -16,25 +19,38 @@ type ServerManager struct {
 // NewServerManager creates a new ServerManager
 func NewServerManager() *ServerManager {
 	return &ServerManager{
-		jarMgr:     NewJARManager(BasePath),
+		jarMgr:     NewJARManager(BasePath, vanilla.NewMojangDownloader()),
 		processMgr: NewProcessManager(),
 		console:    NewFileConsoleProvider(),
 	}
 }
 
+// getDownloader returns the appropriate JARDownloader for the server type
+func getDownloader(serverType models.ServerType) sync.JARDownloader {
+	switch serverType {
+	case models.ServerTypeFabric:
+		return fabric.NewFabricDownloader()
+	case models.ServerTypeVanilla:
+		return vanilla.NewMojangDownloader()
+	default:
+		return vanilla.NewMojangDownloader()
+	}
+}
+
 // PrepareServer prepares a server for starting: creates directories, downloads JAR, generates config
 func (sm *ServerManager) PrepareServer(server *models.Server) error {
+	downloader := getDownloader(server.Type)
+	jarMgr := NewJARManager(BasePath, downloader)
+
 	// Ensure server directory exists
-	serverDir, err := sm.jarMgr.EnsureServerDir(server.ID)
+	serverDir, err := jarMgr.EnsureServerDir(server.ID)
 	if err != nil {
 		return fmt.Errorf("failed to create server directory: %w", err)
 	}
 
-	// Download JAR if missing (only for vanilla servers currently)
-	if server.Type == models.ServerTypeVanilla {
-		if err := sm.jarMgr.DownloadIfMissing(server.ID, server.Version); err != nil {
-			return fmt.Errorf("failed to download JAR: %w", err)
-		}
+	// Download JAR if missing
+	if err := jarMgr.DownloadIfMissing(server.ID, server.Version); err != nil {
+		return fmt.Errorf("failed to download JAR: %w", err)
 	}
 
 	// Generate server.properties
@@ -81,11 +97,11 @@ func (sm *ServerManager) StopServer(serverID uint, force bool) error {
 // GetServerStatus returns the status of a server
 func (sm *ServerManager) GetServerStatus(serverID uint) (*ServerStatus, error) {
 	pid, running := sm.processMgr.GetPID(serverID)
-	
+
 	status := &ServerStatus{
 		Running: running,
 	}
-	
+
 	if running {
 		status.PID = pid
 	}
