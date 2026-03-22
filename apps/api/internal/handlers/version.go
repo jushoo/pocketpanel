@@ -1,6 +1,10 @@
 package handlers
 
 import (
+	"sort"
+	"strconv"
+	"strings"
+
 	"github.com/gofiber/fiber/v3"
 	"gorm.io/gorm"
 
@@ -44,8 +48,28 @@ func (h *VersionsHandler) GetVersions(c fiber.Ctx) error {
 		versionStrings[i] = v.Version
 	}
 
+	sort.Slice(versionStrings, func(i, j int) bool {
+		return compareVersions(versionStrings[j], versionStrings[i]) < 0
+	})
+
 	return c.JSON(fiber.Map{
 		"server_type": serverType,
 		"versions":    versionStrings,
 	})
+}
+
+func compareVersions(a, b string) int {
+	aParts := strings.Split(a, ".")
+	bParts := strings.Split(b, ".")
+	for i := 0; i < len(aParts) && i < len(bParts); i++ {
+		aNum, _ := strconv.Atoi(aParts[i])
+		bNum, _ := strconv.Atoi(bParts[i])
+		if aNum != bNum {
+			if aNum > bNum {
+				return 1
+			}
+			return -1
+		}
+	}
+	return len(aParts) - len(bParts)
 }

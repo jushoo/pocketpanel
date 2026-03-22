@@ -10,8 +10,12 @@
 		CardTitle
 	} from '$lib/components/ui/card';
 	import { Select, SelectContent, SelectItem, SelectTrigger } from '$lib/components/ui/select';
+	import * as Popover from '$lib/components/ui/popover';
+	import * as Command from '$lib/components/ui/command';
 	import { enhance } from '$app/forms';
-	import { Boxes, Info, ArrowLeft, Loader2 } from '@lucide/svelte';
+	import { Boxes, Info, ArrowLeft, Loader2, Check, ChevronsUpDown } from '@lucide/svelte';
+	import { tick } from 'svelte';
+	import { cn } from '$lib/utils.js';
 	import type { ServerType } from './+page.server';
 
 	const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
@@ -28,6 +32,8 @@
 	let availableVersions = $state<string[]>([]);
 	let loadingVersions = $state(false);
 	let versionsError = $state('');
+	let versionOpen = $state(false);
+	let triggerRef = $state<HTMLButtonElement | null>(null);
 
 	// Get the selected server type details
 	let selectedType = $derived(data.serverTypes.find((t: ServerType) => t.id === selectedTypeId));
@@ -45,7 +51,9 @@
 		try {
 			const response = await fetch(`${API_URL}/api/v1/versions/${typeId}`);
 			if (!response.ok) {
-				const errorData = await response.json().catch(() => ({ error: 'Failed to fetch versions' }));
+				const errorData = await response
+					.json()
+					.catch(() => ({ error: 'Failed to fetch versions' }));
 				throw new Error(errorData.error || 'Failed to fetch versions');
 			}
 			const result = await response.json();
@@ -65,6 +73,13 @@
 	function handleNameInput(event: Event) {
 		const target = event.target as HTMLInputElement;
 		nameLength = target.value.length;
+	}
+
+	function closeAndFocusTrigger() {
+		versionOpen = false;
+		tick().then(() => {
+			triggerRef?.focus();
+		});
 	}
 </script>
 
@@ -151,7 +166,12 @@
 								<span class="text-destructive">*</span>
 							</Label>
 							<input type="hidden" name="serverType" value={selectedTypeId} />
-							<Select type="single" bind:value={selectedTypeId} onValueChange={handleTypeChange} required>
+							<Select
+								type="single"
+								bind:value={selectedTypeId}
+								onValueChange={handleTypeChange}
+								required
+							>
 								<SelectTrigger class="w-full">
 									{#if selectedType}
 										{selectedType.name}
@@ -177,27 +197,67 @@
 								<span class="text-destructive">*</span>
 							</Label>
 							<input type="hidden" name="version" bind:value={selectedVersion} />
-							<Select type="single" bind:value={selectedVersion} disabled={!selectedType || loadingVersions} required>
-								<SelectTrigger class="w-full">
-									{#if loadingVersions}
-										<span class="flex items-center gap-2 text-muted-foreground">
-											<Loader2 class="h-4 w-4 animate-spin" />
-											Loading versions...
-										</span>
-									{:else if selectedVersion}
-										{selectedVersion}
-									{:else}
-										<span class="text-muted-foreground">
-											{selectedType ? 'Choose a version' : 'Select a server type first'}
-										</span>
-									{/if}
-								</SelectTrigger>
-								<SelectContent>
-									{#each availableVersions as version (version)}
-										<SelectItem value={version} label={version} />
-									{/each}
-								</SelectContent>
-							</Select>
+							<Popover.Root bind:open={versionOpen}>
+								<Popover.Trigger bind:ref={triggerRef}>
+									{#snippet child({ props })}
+										<Button
+											{...props}
+											variant="outline"
+											role="combobox"
+											aria-expanded={versionOpen}
+											class="h-11 w-full justify-between bg-background"
+											disabled={!selectedType || loadingVersions}
+										>
+											{#if loadingVersions}
+												<span class="flex items-center gap-2 text-muted-foreground">
+													<Loader2 class="h-4 w-4 animate-spin" />
+													Loading versions...
+												</span>
+											{:else if selectedVersion}
+												{selectedVersion}
+											{:else}
+												<span class="text-muted-foreground">
+													{selectedType ? 'Choose a version' : 'Select a server type first'}
+												</span>
+											{/if}
+											<ChevronsUpDown class="ms-2 h-4 w-4 shrink-0 opacity-50" />
+										</Button>
+									{/snippet}
+								</Popover.Trigger>
+								<Popover.Content class="w-[400px] p-0" align="start">
+									<Command.Root>
+										<Command.Input placeholder="Search versions..." />
+										<Command.List>
+											{#if loadingVersions}
+												<div class="flex items-center justify-center py-6">
+													<Loader2 class="h-4 w-4 animate-spin text-muted-foreground" />
+												</div>
+											{:else}
+												<Command.Empty>No version found.</Command.Empty>
+												<Command.Group>
+													{#each availableVersions as version (version)}
+														<Command.Item
+															value={version}
+															onSelect={() => {
+																selectedVersion = version;
+																closeAndFocusTrigger();
+															}}
+														>
+															<Check
+																class={cn(
+																	'me-2 h-4 w-4',
+																	selectedVersion !== version && 'text-transparent'
+																)}
+															/>
+															{version}
+														</Command.Item>
+													{/each}
+												</Command.Group>
+											{/if}
+										</Command.List>
+									</Command.Root>
+								</Popover.Content>
+							</Popover.Root>
 							{#if versionsError}
 								<p class="text-xs text-destructive">{versionsError}</p>
 							{/if}
