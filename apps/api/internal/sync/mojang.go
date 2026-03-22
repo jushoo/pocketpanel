@@ -2,6 +2,7 @@ package sync
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -44,7 +45,7 @@ func (m *MojangFetcher) FetchVersions() ([]models.Version, error) {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, err
+		return nil, fmt.Errorf("unexpected status: %d", resp.StatusCode)
 	}
 
 	var manifest mojangManifest

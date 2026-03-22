@@ -2,6 +2,7 @@ package sync
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -39,7 +40,7 @@ func (f *FabricFetcher) FetchVersions() ([]models.Version, error) {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, err
+		return nil, fmt.Errorf("unexpected status: %d", resp.StatusCode)
 	}
 
 	var fabricVersions []fabricVersion

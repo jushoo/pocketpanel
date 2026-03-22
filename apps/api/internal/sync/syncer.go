@@ -1,7 +1,7 @@
 package sync
 
 import (
-	"log"
+	"fmt"
 
 	"gorm.io/gorm"
 
@@ -32,7 +32,7 @@ func NewSyncer(db *gorm.DB, fetchers ...UpstreamFetcher) *Syncer {
 func (s *Syncer) SyncAll() error {
 	for serverType, fetcher := range s.fetchers {
 		if err := s.syncServerType(serverType, fetcher); err != nil {
-			log.Printf("Failed to sync %s versions: %v", serverType, err)
+			return fmt.Errorf("sync failed for %s: %w", serverType, err)
 		}
 	}
 	return nil
