@@ -50,10 +50,15 @@ func New(cfg *config.Config, db *gorm.DB) *fiber.App {
 	api.Post("/auth/login", authHandler.Login)
 	api.Post("/auth/logout", authHandler.Logout)
 
-	serverHandler := handlers.NewServerHandler(db)
+	serverHandler := handlers.NewServerHandler(db, cfg.ServersPath)
 	api.Post("/servers", serverHandler.Create)
 	api.Get("/servers", serverHandler.List)
 	api.Get("/servers/:id", serverHandler.Get)
+	api.Post("/servers/:id/start", serverHandler.Start)
+	api.Post("/servers/:id/stop", serverHandler.Stop)
+	api.Get("/servers/:id/status", serverHandler.Status)
+	api.Post("/servers/:id/command", serverHandler.Command)
+	api.Get("/servers/:id/console", serverHandler.Console)
 
 	versionsHandler := handlers.NewVersionsHandler(db)
 	api.Get("/versions/:type", versionsHandler.GetVersions)

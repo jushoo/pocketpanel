@@ -89,13 +89,13 @@ export const actions: Actions = {
 			}
 		}
 
-		// Validate memory
-		const minMemNum = parseInt(minMemory || '2', 10);
-		const maxMemNum = parseInt(maxMemory || '4', 10);
+		// Validate memory (in MB)
+		const minMemNum = parseInt(minMemory || '2048', 10);
+		const maxMemNum = parseInt(maxMemory || '4096', 10);
 
-		if (isNaN(minMemNum) || minMemNum < 1) {
+		if (isNaN(minMemNum) || minMemNum < 512) {
 			return fail(400, {
-				error: 'Minimum memory must be at least 1 GB',
+				error: 'Minimum memory must be at least 512 MB',
 				values: { name, serverType, version, port, minMemory, maxMemory }
 			});
 		}
@@ -107,9 +107,9 @@ export const actions: Actions = {
 			});
 		}
 
-		if (maxMemNum > 128) {
+		if (maxMemNum > 131072) {
 			return fail(400, {
-				error: 'Maximum memory cannot exceed 128 GB',
+				error: 'Maximum memory cannot exceed 131072 MB (128 GB)',
 				values: { name, serverType, version, port, minMemory, maxMemory }
 			});
 		}
