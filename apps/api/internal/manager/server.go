@@ -11,17 +11,19 @@ import (
 
 // ServerManager orchestrates all server-related operations
 type ServerManager struct {
-	jarMgr     *JARManager
-	processMgr *ProcessManager
-	console    *FileConsoleProvider
+	jarMgr      *JARManager
+	processMgr  *ProcessManager
+	console     *FileConsoleProvider
+	serversPath string
 }
 
 // NewServerManager creates a new ServerManager
-func NewServerManager() *ServerManager {
+func NewServerManager(serversPath string) *ServerManager {
 	return &ServerManager{
-		jarMgr:     NewJARManager(BasePath, vanilla.NewMojangDownloader()),
-		processMgr: NewProcessManager(),
-		console:    NewFileConsoleProvider(),
+		jarMgr:      NewJARManager(serversPath, vanilla.NewMojangDownloader()),
+		processMgr:  NewProcessManager(serversPath),
+		console:     NewFileConsoleProvider(),
+		serversPath: serversPath,
 	}
 }
 
@@ -40,7 +42,7 @@ func getDownloader(serverType models.ServerType) sync.JARDownloader {
 // PrepareServer prepares a server for starting: creates directories, downloads JAR, generates config
 func (sm *ServerManager) PrepareServer(server *models.Server) error {
 	downloader := getDownloader(server.Type)
-	jarMgr := NewJARManager(BasePath, downloader)
+	jarMgr := NewJARManager(sm.serversPath, downloader)
 
 	// Ensure server directory exists
 	serverDir, err := jarMgr.EnsureServerDir(server.ID)

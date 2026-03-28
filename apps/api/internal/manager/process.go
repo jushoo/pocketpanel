@@ -29,16 +29,18 @@ type ProcessInfo struct {
 
 // ProcessManager manages Minecraft server processes.
 type ProcessManager struct {
-	mu       sync.RWMutex
-	processes map[uint]*ProcessInfo
+	mu              sync.RWMutex
+	processes       map[uint]*ProcessInfo
 	shutdownTimeout time.Duration
+	serversPath     string
 }
 
 // NewProcessManager creates a new ProcessManager.
-func NewProcessManager() *ProcessManager {
+func NewProcessManager(serversPath string) *ProcessManager {
 	return &ProcessManager{
-		processes: make(map[uint]*ProcessInfo),
+		processes:       make(map[uint]*ProcessInfo),
 		shutdownTimeout: DefaultShutdownTimeout,
+		serversPath:     serversPath,
 	}
 }
 
@@ -113,8 +115,8 @@ func (pm *ProcessManager) Start(server *models.Server, jarPath string) error {
 
 	// Store process info
 	pm.processes[server.ID] = &ProcessInfo{
-		PID:    cmd.Process.Pid,
-		Server: server,
+		PID:     cmd.Process.Pid,
+		Server:  server,
 		StartAt: time.Now(),
 	}
 
@@ -281,11 +283,8 @@ func (pm *ProcessManager) SendCommand(serverID uint, command string) error {
 		return fmt.Errorf("server %d is not running", serverID)
 	}
 
-	// Try to write to process (this may not work if stdin is not a pipe)
-	// For proper stdin handling, we'd need to use os/exec with a stdin pipe
-	// For now, we'll create a pipe file that the server reads from
-	pipePath := filepath.Join(GetServerDirStatic(serverID), "logs", "stdin.pipe")
-	
+	pipePath := filepath.Join(pm.getServerDir(serverID), "logs", "stdin.pipe")
+
 	f, err := os.OpenFile(pipePath, os.O_WRONLY|os.O_APPEND, 0644)
 	if err != nil {
 		return fmt.Errorf("failed to open stdin pipe: %w", err)
@@ -296,7 +295,7 @@ func (pm *ProcessManager) SendCommand(serverID uint, command string) error {
 	return err
 }
 
-// GetServerDirStatic returns the server directory path (static version for use in SendCommand)
-func GetServerDirStatic(serverID uint) string {
-	return filepath.Join(BasePath, fmt.Sprintf("%d", serverID))
+// getServerDir returns the server directory path for the given server ID.
+func (pm *ProcessManager) getServerDir(serverID uint) string {
+	return filepath.Join(pm.serversPath, fmt.Sprintf("%d", serverID))
 }

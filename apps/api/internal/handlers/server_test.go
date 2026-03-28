@@ -239,7 +239,7 @@ func setupTestDB(t *testing.T) *gorm.DB {
 
 func TestListServers(t *testing.T) {
 	db := setupTestDB(t)
-	handler := NewServerHandler(db)
+	handler := NewServerHandler(db, "/tmp/test-servers")
 
 	tests := []struct {
 		name           string
@@ -284,7 +284,7 @@ func TestListServers(t *testing.T) {
 
 func TestCreateServer(t *testing.T) {
 	db := setupTestDB(t)
-	handler := NewServerHandler(db)
+	handler := NewServerHandler(db, "/tmp/test-servers")
 
 	tests := []struct {
 		name           string

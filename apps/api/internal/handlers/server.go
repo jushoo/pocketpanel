@@ -14,14 +14,14 @@ import (
 
 // ServerHandler handles server-related HTTP requests.
 type ServerHandler struct {
-	db           *gorm.DB
-	serverMgr    *manager.ServerManager
+	db        *gorm.DB
+	serverMgr *manager.ServerManager
 }
 
-func NewServerHandler(db *gorm.DB) *ServerHandler {
+func NewServerHandler(db *gorm.DB, serversPath string) *ServerHandler {
 	return &ServerHandler{
-		db:           db,
-		serverMgr:    manager.NewServerManager(),
+		db:        db,
+		serverMgr: manager.NewServerManager(serversPath),
 	}
 }
 

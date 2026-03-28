@@ -160,6 +160,7 @@ cd apps/web && npx shadcn-svelte@latest add <component-name>
 - `DATABASE_PATH` - SQLite file path
 - `ENV` - `development` or `production`
 - `CORS_ORIGINS` - Comma-separated allowed origins
+- `SERVERS_PATH` - Path for server files (default: `/opt/pocketpanel/servers`)
 
 ## Authentication Flow
 

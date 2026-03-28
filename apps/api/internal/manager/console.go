@@ -185,10 +185,10 @@ type ServerConsole struct {
 }
 
 // NewServerConsole creates a new ServerConsole
-func NewServerConsole() *ServerConsole {
+func NewServerConsole(serversPath string) *ServerConsole {
 	return &ServerConsole{
-		processMgr: NewProcessManager(),
-		jarMgr:     NewJARManager("", vanilla.NewMojangDownloader()),
+		processMgr: NewProcessManager(serversPath),
+		jarMgr:     NewJARManager(serversPath, vanilla.NewMojangDownloader()),
 		console:    NewFileConsoleProvider(),
 	}
 }

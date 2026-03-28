@@ -10,6 +10,7 @@ type Config struct {
 	DatabasePath string
 	Environment  string
 	CORSOrigins  []string
+	ServersPath  string
 }
 
 func Load() (*Config, error) {
@@ -20,6 +21,7 @@ func Load() (*Config, error) {
 		DatabasePath: getEnv("DATABASE_PATH", "pocketpanel.db"),
 		Environment:  getEnv("ENV", "development"),
 		CORSOrigins:  strings.Split(corsOrigins, ","),
+		ServersPath:  getEnv("SERVERS_PATH", "apps/api/tmp"),
 	}, nil
 }
 
