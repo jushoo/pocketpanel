@@ -18,51 +18,9 @@ func NewAuthHandler(db *gorm.DB, store *session.Store) *AuthHandler {
 	return &AuthHandler{db: db, store: store}
 }
 
-type RegisterRequest struct {
-	Username string `json:"username" validate:"required,min=3,max=50"`
-	Password string `json:"password" validate:"required,min=8"`
-}
-
 type LoginRequest struct {
 	Username string `json:"username" validate:"required"`
 	Password string `json:"password" validate:"required"`
-}
-
-func (h *AuthHandler) Register(c fiber.Ctx) error {
-	var req RegisterRequest
-	if err := c.Bind().Body(&req); err != nil {
-		return err // Error handled by customErrorHandler
-	}
-
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": "Failed to hash password",
-		})
-	}
-
-	user := models.User{
-		Username: req.Username,
-		Password: string(hashedPassword),
-	}
-
-	if err := h.db.Create(&user).Error; err != nil {
-		// Check for unique constraint violation
-		if err == gorm.ErrDuplicatedKey {
-			return c.Status(fiber.StatusConflict).JSON(fiber.Map{
-				"error": "Username already exists",
-			})
-		}
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": "Failed to create user",
-		})
-	}
-
-	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
-		"id":         user.ID,
-		"username":   user.Username,
-		"created_at": user.CreatedAt,
-	})
 }
 
 func (h *AuthHandler) Login(c fiber.Ctx) error {

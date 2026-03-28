@@ -1,16 +1,16 @@
-.PHONY: dev dev-api dev-web build test install clean db-migrate
+.PHONY: dev dev-api dev-ui build test install clean db-migrate
 
-# Ports: Web 3000, API 3001
-WEB_PORT=3000
+# Ports: UI 3000, API 3001
+UI_PORT=3000
 API_PORT=3001
 
 dev:
 	@echo "Starting development servers..."
 	pnpm exec concurrently \
-		-n "API,WEB" \
+		-n "API,UI" \
 		-c "cyan,green" \
 		"make dev-api" \
-		"make dev-web"
+		"make dev-ui"
 
 dev-api:
 	@echo "Starting Go API on port $(API_PORT)..."
@@ -21,18 +21,18 @@ dev-api:
 		cd apps/api && go run cmd/server/main.go; \
 	fi
 
-dev-web:
-	@echo "Starting Svelte dev server on port $(WEB_PORT)..."
-	cd apps/web && pnpm dev --port $(WEB_PORT)
+dev-ui:
+	@echo "Starting SolidStart dev server on port $(UI_PORT)..."
+	cd apps/ui && pnpm dev --port $(UI_PORT)
 
 build:
 	@echo "Building production..."
-	cd apps/web && pnpm build
+	cd apps/ui && pnpm build
 	cd apps/api && go build -o bin/server cmd/server/main.go
 
 test:
 	@echo "Running tests..."
-	cd apps/web && pnpm test
+	cd apps/ui && pnpm test
 	cd apps/api && go test ./...
 
 install:
@@ -46,7 +46,8 @@ db-migrate:
 
 clean:
 	@echo "Cleaning build artifacts..."
-	rm -rf apps/web/dist
+	rm -rf apps/ui/dist
+	rm -rf apps/ui/.output
 	rm -rf apps/api/bin
 	rm -rf apps/api/tmp
 	rm -f apps/api/*.db

@@ -47,7 +47,6 @@ func New(cfg *config.Config, db *gorm.DB) *fiber.App {
 	api := app.Group("/api/v1")
 
 	authHandler := handlers.NewAuthHandler(db, sessionStore)
-	api.Post("/auth/register", authHandler.Register)
 	api.Post("/auth/login", authHandler.Login)
 	api.Post("/auth/logout", authHandler.Logout)
 
