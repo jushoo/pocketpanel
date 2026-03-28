@@ -1,4 +1,10 @@
-import { query, createAsync, action, redirect, useSubmission } from "@solidjs/router";
+import {
+  query,
+  createAsync,
+  action,
+  redirect,
+  useSubmission,
+} from "@solidjs/router";
 import { createSignal, Show, For } from "solid-js";
 import { A } from "@solidjs/router";
 import { Button } from "~/components/ui/button";
@@ -9,7 +15,7 @@ import {
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle
+  CardTitle,
 } from "~/components/ui/card";
 import { Boxes, Info, ArrowLeft } from "lucide-solid";
 
@@ -26,26 +32,26 @@ const getServerTypes = query(async () => {
   const response = await fetch(`${API_URL}/api/v1/server-types`, {
     credentials: "include",
   });
-  
+
   if (!response.ok) {
     throw new Error("Failed to fetch server types");
   }
-  
+
   return response.json() as Promise<ServerType[]>;
 }, "getServerTypes");
 
 // Query to fetch versions for a type
 const getVersions = query(async (typeId: string) => {
   if (!typeId) return [];
-  
+
   const response = await fetch(`${API_URL}/api/v1/versions/${typeId}`, {
     credentials: "include",
   });
-  
+
   if (!response.ok) {
     throw new Error("Failed to fetch versions");
   }
-  
+
   const data = await response.json();
   return data.versions as string[];
 }, "getVersions");
@@ -87,7 +93,10 @@ const createServerAction = action(async (formData: FormData) => {
     if (err instanceof Response && err.status === 302) {
       throw err;
     }
-    return { ok: false, message: "An error occurred while creating the server" };
+    return {
+      ok: false,
+      message: "An error occurred while creating the server",
+    };
   }
 }, "createServer");
 
@@ -99,18 +108,18 @@ export function routeData() {
 }
 
 export default function CreateServerPage() {
-  // Access route data
+  // Access route data via createAsync (following codebase pattern)
   const serverTypes = createAsync(() => getServerTypes());
-  
+
   const submission = useSubmission(createServerAction);
   const [selectedTypeId, setSelectedTypeId] = createSignal("");
   const [selectedVersion, setSelectedVersion] = createSignal("");
   const [nameLength, setNameLength] = createSignal(0);
-  
-  // Create async for versions based on selected type
+
   const versions = createAsync(() => getVersions(selectedTypeId()));
 
-  const selectedType = () => serverTypes()?.find((t: ServerType) => t.id === selectedTypeId());
+  const selectedType = () =>
+    serverTypes()?.find((t: ServerType) => t.id === selectedTypeId());
 
   const handleNameInput = (e: InputEvent) => {
     const target = e.target as HTMLInputElement;
@@ -128,7 +137,9 @@ export default function CreateServerPage() {
             </Button>
             <div>
               <h1 class="text-xl font-medium text-foreground">Create Server</h1>
-              <p class="text-sm text-muted-foreground">Set up a new Minecraft server</p>
+              <p class="text-sm text-muted-foreground">
+                Set up a new Minecraft server
+              </p>
             </div>
           </div>
         </div>
@@ -142,7 +153,9 @@ export default function CreateServerPage() {
                 <Boxes class="h-6 w-6 text-muted-foreground" />
               </div>
               <CardTitle class="text-lg font-medium">Create Server</CardTitle>
-              <CardDescription>Configure your new Minecraft server</CardDescription>
+              <CardDescription>
+                Configure your new Minecraft server
+              </CardDescription>
             </CardHeader>
             <CardContent>
               {submission.result?.ok === false && (
@@ -169,7 +182,9 @@ export default function CreateServerPage() {
                     required
                   />
                   <div class="flex justify-end">
-                    <span class="text-xs text-muted-foreground">{nameLength()} / 100</span>
+                    <span class="text-xs text-muted-foreground">
+                      {nameLength()} / 100
+                    </span>
                   </div>
                 </div>
 
@@ -179,7 +194,10 @@ export default function CreateServerPage() {
                     Server Type
                     <span class="text-destructive">*</span>
                   </Label>
-                  <Show when={!serverTypes.loading} fallback={<div>Loading types...</div>}>
+                  <Show
+                    when={!serverTypes.loading}
+                    fallback={<div>Loading types...</div>}
+                  >
                     <select
                       id="serverType"
                       name="serverType"
@@ -198,7 +216,9 @@ export default function CreateServerPage() {
                     </select>
                   </Show>
                   <Show when={selectedType()}>
-                    <p class="text-xs text-muted-foreground">{selectedType()?.description}</p>
+                    <p class="text-xs text-muted-foreground">
+                      {selectedType()?.description}
+                    </p>
                   </Show>
                 </div>
 
@@ -208,21 +228,30 @@ export default function CreateServerPage() {
                     Server Version
                     <span class="text-destructive">*</span>
                   </Label>
-                  <Show when={!versions.loading} fallback={<div>Loading versions...</div>}>
+                  <Show
+                    when={!versions.loading}
+                    fallback={<div>Loading versions...</div>}
+                  >
                     <select
                       id="version"
                       name="version"
                       value={selectedVersion()}
-                      onChange={(e) => setSelectedVersion(e.currentTarget.value)}
+                      onChange={(e) =>
+                        setSelectedVersion(e.currentTarget.value)
+                      }
                       class="h-11 w-full rounded-4xl border border-input bg-input/30 px-3 py-1 text-base transition-colors outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
                       disabled={!selectedTypeId()}
                       required
                     >
                       <option value="">
-                        {selectedTypeId() ? "Choose a version" : "Select a server type first"}
+                        {selectedTypeId()
+                          ? "Choose a version"
+                          : "Select a server type first"}
                       </option>
                       <For each={versions()}>
-                        {(version) => <option value={version}>{version}</option>}
+                        {(version) => (
+                          <option value={version}>{version}</option>
+                        )}
                       </For>
                     </select>
                   </Show>
@@ -243,7 +272,9 @@ export default function CreateServerPage() {
                     max={65535}
                     class="h-11"
                   />
-                  <p class="text-xs text-muted-foreground">Auto-assigned if left empty</p>
+                  <p class="text-xs text-muted-foreground">
+                    Auto-assigned if left empty
+                  </p>
                 </div>
 
                 {/* Memory Allocation */}
@@ -251,7 +282,12 @@ export default function CreateServerPage() {
                   <Label>Memory Allocation (GB)</Label>
                   <div class="grid grid-cols-2 gap-4">
                     <div class="space-y-2">
-                      <Label for="minMemory" class="text-xs text-muted-foreground">Minimum</Label>
+                      <Label
+                        for="minMemory"
+                        class="text-xs text-muted-foreground"
+                      >
+                        Minimum
+                      </Label>
                       <Input
                         id="minMemory"
                         name="minMemory"
@@ -263,7 +299,12 @@ export default function CreateServerPage() {
                       />
                     </div>
                     <div class="space-y-2">
-                      <Label for="maxMemory" class="text-xs text-muted-foreground">Maximum</Label>
+                      <Label
+                        for="maxMemory"
+                        class="text-xs text-muted-foreground"
+                      >
+                        Maximum
+                      </Label>
                       <Input
                         id="maxMemory"
                         name="maxMemory"
@@ -281,15 +322,27 @@ export default function CreateServerPage() {
                 {/* Info Note */}
                 <div class="flex items-start gap-2 rounded-lg bg-muted px-3 py-2">
                   <Info class="mt-0.5 h-4 w-4 flex-shrink-0 text-muted-foreground" />
-                  <p class="text-xs text-muted-foreground">These settings can be changed later</p>
+                  <p class="text-xs text-muted-foreground">
+                    These settings can be changed later
+                  </p>
                 </div>
 
                 {/* Actions */}
                 <div class="flex items-center justify-between gap-4 pt-2">
-                  <Button type="button" variant="ghost" as="a" href="/dashboard" disabled={submission.pending}>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    as="a"
+                    href="/dashboard"
+                    disabled={submission.pending}
+                  >
                     Cancel
                   </Button>
-                  <Button type="submit" disabled={submission.pending} class="min-w-[140px]">
+                  <Button
+                    type="submit"
+                    disabled={submission.pending}
+                    class="min-w-[140px]"
+                  >
                     {submission.pending ? "Creating..." : "Create Server"}
                   </Button>
                 </div>
