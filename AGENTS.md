@@ -1,6 +1,6 @@
 # Agent Guidelines for PocketPanel
 
-This is a monorepo with a SvelteKit frontend (Port 3000) and Go backend (Port 3001).
+This is a monorepo with a SolidStart frontend (Port 3000) and Go backend (Port 3001).
 
 ## Build & Development Commands
 
@@ -16,12 +16,12 @@ make clean            # Clean build artifacts
 
 ### Individual Apps
 
-**Web (SvelteKit):**
+**Web (SolidStart):**
 ```bash
 cd apps/web
 pnpm dev              # Dev server
 pnpm build            # Production build
-pnpm check            # TypeScript + Svelte check
+pnpm check            # TypeScript check
 pnpm lint             # ESLint + Prettier check
 pnpm format           # Auto-format with Prettier
 pnpm test             # Run all tests
@@ -40,40 +40,41 @@ go test -run TestName ./...         # Single test
 
 ## Code Style
 
-### TypeScript/Svelte Import Ordering
+### TypeScript/Solid Import Ordering
 ```typescript
-import { redirect } from '@sveltejs/kit';
-import { Button } from '$lib/components/ui/button';
+import { redirect } from '@solidjs/router';
+import { Button } from '~/components/ui/button';
 import { describe, it, expect } from 'vitest';
-import type { Actions, PageServerLoad } from './$types';
+import type { RouteDefinition } from '@solidjs/router';
 ```
 
-### TypeScript/Svelte Naming
-- **Components**: PascalCase (`Button.svelte`)
+### TypeScript/Solid Naming
+- **Components**: PascalCase (`Button.tsx`)
 - **Utilities**: camelCase (`formatDate.ts`)
-- **Routes**: kebab-case folders (`+page.svelte`)
-- **Props/State**: Destructure from `$props()` and `$state()` runes
+- **Routes**: kebab-case files (`index.tsx`, `about.tsx`)
+- **Props/State**: Use `createSignal()` and `createStore()` for state, destructure props
 
-```svelte
-<script lang="ts">
-  let { data } = $props();
-  let loading = $state(false);
-</script>
-```
+```tsx
+import { createSignal } from 'solid-js';
 
-### TypeScript/Svelte Error Handling
-Use `isRedirect()` (not `instanceof`) and `fail()` for errors:
-
-```typescript
-import { fail, redirect, isRedirect } from '@sveltejs/kit';
-
-catch (error) {
-  if (isRedirect(error)) throw error;
-  return fail(500, { error: 'User-friendly message' });
+function Button(props: { label: string }) {
+  const [count, setCount] = createSignal(0);
+  return <button>{props.label}</button>;
 }
 ```
 
-### TypeScript/Svelte Testing
+### TypeScript/Solid Error Handling
+Use standard try/catch with proper error responses:
+
+```typescript
+try {
+  const data = await fetchData();
+} catch (error) {
+  throw new Response('User-friendly message', { status: 500 });
+}
+```
+
+### TypeScript/Solid Testing
 ```typescript
 import { describe, it, expect } from 'vitest';
 
@@ -124,14 +125,14 @@ func (h *Handler) Process(id string) (*Result, error) {
 ### Component Usage
 Install components via CLI:
 ```bash
-cd apps/web && npx shadcn-svelte@latest add <component-name>
+cd apps/web && npx shadcn@latest add <component-name>
 ```
 
 ### Styling Rules
-- **NEVER modify CSS theme** in `src/routes/layout.css`
+- **NEVER modify CSS theme** in `src/app.css`
 - **Use theme CSS variables**: `bg-background`, `text-foreground`, `text-muted-foreground`
 - **NO hardcoded colors**: Don't use `bg-[#0d0d0d]` or `text-white/90`
-- **Trust shadcn-svelte defaults**: Don't override component styles unnecessarily
+- **Trust shadcn defaults**: Don't override component styles unnecessarily
 
 ### Design Principles
 - **Clean** - Minimal visual noise, generous whitespace
@@ -140,7 +141,7 @@ cd apps/web && npx shadcn-svelte@latest add <component-name>
 - **Ollama-style** - Centered content, subtle borders, muted text hierarchy
 
 ### Good Example
-```svelte
+```tsx
 <div class="min-h-screen flex items-center justify-center bg-background">
   <div class="w-full max-w-sm px-6">
     <h1 class="text-xl font-medium text-foreground">Title</h1>
