@@ -3,6 +3,7 @@ import { Show } from "solid-js";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
+import { ModeToggle } from "~/components/ModeToggle";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3001";
 
@@ -42,7 +43,10 @@ export default function LoginPage() {
   const submission = useSubmission(loginAction);
 
   return (
-    <div class="flex min-h-screen w-full items-center justify-center bg-background">
+    <div class="relative flex min-h-screen w-full items-center justify-center bg-background">
+      <div class="absolute right-4 top-4">
+        <ModeToggle />
+      </div>
       <div class="w-full max-w-sm px-6">
         <div class="mb-12 text-center">
           <div class="mb-6 inline-flex h-12 w-12 items-center justify-center rounded-xl border border-border bg-muted">

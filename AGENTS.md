@@ -120,19 +120,116 @@ func (h *Handler) Process(id string) (*Result, error) {
 }
 ```
 
-## UI Styling (Web)
+## UI Architecture - Kobalte + Tailwind CSS
 
-### Component Usage
-Install components via CLI:
-```bash
-cd apps/web && npx shadcn@latest add <component-name>
+This project uses **Kobalte primitives** with **Tailwind CSS** for all UI components. We do NOT use solid-ui CLI or shadcn/ui - components are built directly on Kobalte.
+
+### Creating New Components
+
+Components are created in `apps/ui/src/components/ui/` following these patterns:
+
+**Pattern 1: Kobalte Primitive Wrapper** (for complex interactive components)
+```typescript
+import type { JSX, ValidComponent } from "solid-js"
+import { splitProps } from "solid-js"
+import * as ButtonPrimitive from "@kobalte/core/button"
+import type { PolymorphicProps } from "@kobalte/core/polymorphic"
+import { cn } from "~/lib/utils"
+
+type ButtonProps<T extends ValidComponent = "button"> = 
+  ButtonPrimitive.ButtonRootProps<T> & { class?: string }
+
+const Button = <T extends ValidComponent = "button">(
+  props: PolymorphicProps<T, ButtonProps<T>>
+) => {
+  const [local, others] = splitProps(props as ButtonProps, ["class"])
+  return (
+    <ButtonPrimitive.Root
+      class={cn("inline-flex items-center...", local.class)}
+      {...others}
+    />
+  )
+}
+
+export { Button }
 ```
+
+**Pattern 2: Simple HTML Wrapper** (for basic styled elements)
+```typescript
+import type { Component, ComponentProps } from "solid-js"
+import { splitProps } from "solid-js"
+import { cn } from "~/lib/utils"
+
+const Input: Component<ComponentProps<"input">> = (props) => {
+  const [local, others] = splitProps(props, ["class", "type"])
+  return (
+    <input
+      type={local.type || "text"}
+      class={cn(
+        "flex h-10 w-full rounded-md border border-input...",
+        local.class
+      )}
+      {...others}
+    />
+  )
+}
+
+export { Input }
+```
+
+**Pattern 3: CVA Variants** (for components with multiple visual states)
+```typescript
+import { cva } from "class-variance-authority"
+
+const buttonVariants = cva(
+  "inline-flex items-center justify-center...",
+  {
+    variants: {
+      variant: {
+        default: "bg-primary text-primary-foreground...",
+        outline: "border border-input...",
+      },
+      size: {
+        default: "h-10 px-4 py-2",
+        sm: "h-9 px-3",
+      }
+    },
+    defaultVariants: {
+      variant: "default",
+      size: "default"
+    }
+  }
+)
+```
+
+### Available Kobalte Primitives
+
+Use these Kobalte primitives when building components:
+
+- `@kobalte/core/button` - Buttons, actions
+- `@kobalte/core/select` - Dropdown selects
+- `@kobalte/core/combobox` - Autocomplete/search selects
+- `@kobalte/core/checkbox` - Checkboxes
+- `@kobalte/core/dialog` - Modal dialogs
+- `@kobalte/core/dropdown-menu` - Context menus
+- `@kobalte/core/hover-card` - Hover popovers
+- `@kobalte/core/label` - Form labels
+- `@kobalte/core/menubar` - Menu bars
+- `@kobalte/core/popover` - Floating popovers
+- `@kobalte/core/radio-group` - Radio buttons
+- `@kobalte/core/slider` - Range sliders
+- `@kobalte/core/switch` - Toggle switches
+- `@kobalte/core/tabs` - Tab panels
+- `@kobalte/core/text-field` - Form inputs
+- `@kobalte/core/tooltip` - Tooltips
+
+For simple elements (Card, Badge) that don't need interaction primitives, use plain HTML elements styled with Tailwind CSS.
 
 ### Styling Rules
 - **NEVER modify CSS theme** in `src/app.css`
 - **Use theme CSS variables**: `bg-background`, `text-foreground`, `text-muted-foreground`
 - **NO hardcoded colors**: Don't use `bg-[#0d0d0d]` or `text-white/90`
-- **Trust shadcn defaults**: Don't override component styles unnecessarily
+- **Trust component defaults**: Don't override Kobalte primitive styles unnecessarily
 
 ### Design Principles
 - **Clean** - Minimal visual noise, generous whitespace
@@ -150,6 +247,13 @@ cd apps/web && npx shadcn@latest add <component-name>
   </div>
 </div>
 ```
+
+### Important Notes
+- **DO NOT use `npx solidui-cli`** - This tool is broken and removed from the project
+- **DO NOT use `npx shadcn`** - This is a React tool, not for Solid
+- All components are in `apps/ui/src/components/ui/`
+- Use the existing components as templates for new ones
+- Import components from `~/components/ui/<component>`
 
 ## Environment Configuration
 

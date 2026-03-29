@@ -2,6 +2,7 @@ import { query, createAsync, useSubmission, action, redirect, useParams } from "
 import { createSignal, Show, For } from "solid-js";
 import { Button } from "~/components/ui/button";
 import { Badge } from "~/components/ui/badge";
+import { ModeToggle } from "~/components/ModeToggle";
 import { Plus, Server as ServerIcon, Circle } from "lucide-solid";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3001";
@@ -109,6 +110,7 @@ export default function DashboardPage() {
             </p>
           </div>
           <div class="flex items-center gap-4">
+            <ModeToggle />
             <Show when={user()}>
               <span class="text-sm text-muted-foreground">
                 {user()?.username}

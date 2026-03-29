@@ -18,12 +18,16 @@ import {
 } from "~/components/ui/card";
 import { Boxes, Info, ArrowLeft } from "lucide-solid";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-} from "~/components/ui/select";
-import { Select as SelectPrimitive } from "@kobalte/core/select";
+  Combobox,
+  ComboboxContent,
+  ComboboxControl,
+  ComboboxHiddenSelect,
+  ComboboxInput,
+  ComboboxItem,
+  ComboboxItemIndicator,
+  ComboboxItemLabel,
+  ComboboxTrigger,
+} from "~/components/ui/combobox";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3001";
 
@@ -204,30 +208,30 @@ export default function CreateServerPage() {
                     when={!serverTypes.loading}
                     fallback={<div>Loading types...</div>}
                   >
-                    <Select
+                    <Combobox
                       options={serverTypes() || []}
                       optionValue="id"
                       optionTextValue="name"
+                      placeholder="Choose a server type"
                       value={serverTypes()?.find((t: ServerType) => t.id === selectedTypeId()) || null}
                       onChange={(selected) => {
                         setSelectedTypeId(selected?.id || "");
                         setSelectedVersion("");
                       }}
-                      placeholder="Choose a server type"
                       itemComponent={(props) => (
-                        <SelectItem item={props.item}>
-                          {props.item.rawValue.name}
-                        </SelectItem>
+                        <ComboboxItem item={props.item}>
+                          <ComboboxItemLabel>{props.item.rawValue.name}</ComboboxItemLabel>
+                          <ComboboxItemIndicator />
+                        </ComboboxItem>
                       )}
                     >
-                      <Select.HiddenSelect name="serverType" required />
-                      <SelectTrigger class="h-11 w-full">
-                        <SelectPrimitive.Value<ServerType>>
-                          {(state) => state.selectedOption()?.name || "Choose a server type"}
-                        </SelectPrimitive.Value>
-                      </SelectTrigger>
-                      <SelectContent />
-                    </Select>
+                      <ComboboxHiddenSelect name="serverType" required />
+                      <ComboboxControl class="h-11 w-full">
+                        <ComboboxInput />
+                        <ComboboxTrigger />
+                      </ComboboxControl>
+                      <ComboboxContent />
+                    </Combobox>
                   </Show>
                   <Show when={selectedType()}>
                     <p class="text-xs text-muted-foreground">
@@ -246,26 +250,26 @@ export default function CreateServerPage() {
                     when={!versions.loading}
                     fallback={<div>Loading versions...</div>}
                   >
-                    <Select
+                    <Combobox
                       options={versions() || []}
-                      value={selectedVersion()}
-                      onChange={(selected) => setSelectedVersion(selected || "")}
                       placeholder={selectedTypeId() ? "Choose a version" : "Select a server type first"}
-                      itemComponent={(props) => (
-                        <SelectItem item={props.item}>
-                          {props.item.rawValue}
-                        </SelectItem>
-                      )}
+                      value={selectedVersion() || null}
+                      onChange={(selected) => setSelectedVersion(selected || "")}
                       disabled={!selectedTypeId()}
+                      itemComponent={(props) => (
+                        <ComboboxItem item={props.item}>
+                          <ComboboxItemLabel>{props.item.rawValue}</ComboboxItemLabel>
+                          <ComboboxItemIndicator />
+                        </ComboboxItem>
+                      )}
                     >
-                      <Select.HiddenSelect name="version" required />
-                      <SelectTrigger class="h-11 w-full">
-                        <SelectPrimitive.Value<string>>
-                          {(state) => state.selectedOption() || (selectedTypeId() ? "Choose a version" : "Select a server type first")}
-                        </SelectPrimitive.Value>
-                      </SelectTrigger>
-                      <SelectContent />
-                    </Select>
+                      <ComboboxHiddenSelect name="version" required />
+                      <ComboboxControl class="h-11 w-full">
+                        <ComboboxInput />
+                        <ComboboxTrigger />
+                      </ComboboxControl>
+                      <ComboboxContent />
+                    </Combobox>
                   </Show>
                 </div>
 
