@@ -61,6 +61,7 @@ func New(cfg *config.Config, db *gorm.DB) *fiber.App {
 	api.Get("/servers/:id/console", serverHandler.Console)
 
 	versionsHandler := handlers.NewVersionsHandler(db)
+	api.Get("/server-types", versionsHandler.GetServerTypes)
 	api.Get("/versions/:type", versionsHandler.GetVersions)
 
 	protected := api.Group("/", middleware.Auth(sessionStore))

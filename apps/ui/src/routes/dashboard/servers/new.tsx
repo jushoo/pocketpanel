@@ -5,8 +5,7 @@ import {
   redirect,
   useSubmission,
 } from "@solidjs/router";
-import { createSignal, Show, For } from "solid-js";
-import { A } from "@solidjs/router";
+import { createSignal, Show } from "solid-js";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
@@ -18,6 +17,13 @@ import {
   CardTitle,
 } from "~/components/ui/card";
 import { Boxes, Info, ArrowLeft } from "lucide-solid";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+} from "~/components/ui/select";
+import { Select as SelectPrimitive } from "@kobalte/core/select";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3001";
 
@@ -198,22 +204,30 @@ export default function CreateServerPage() {
                     when={!serverTypes.loading}
                     fallback={<div>Loading types...</div>}
                   >
-                    <select
-                      id="serverType"
-                      name="serverType"
-                      value={selectedTypeId()}
-                      onChange={(e) => {
-                        setSelectedTypeId(e.currentTarget.value);
+                    <Select
+                      options={serverTypes() || []}
+                      optionValue="id"
+                      optionTextValue="name"
+                      value={serverTypes()?.find((t: ServerType) => t.id === selectedTypeId()) || null}
+                      onChange={(selected) => {
+                        setSelectedTypeId(selected?.id || "");
                         setSelectedVersion("");
                       }}
-                      class="h-11 w-full rounded-4xl border border-input bg-input/30 px-3 py-1 text-base transition-colors outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
-                      required
+                      placeholder="Choose a server type"
+                      itemComponent={(props) => (
+                        <SelectItem item={props.item}>
+                          {props.item.rawValue.name}
+                        </SelectItem>
+                      )}
                     >
-                      <option value="">Choose a server type</option>
-                      <For each={serverTypes()}>
-                        {(type) => <option value={type.id}>{type.name}</option>}
-                      </For>
-                    </select>
+                      <Select.HiddenSelect name="serverType" required />
+                      <SelectTrigger class="h-11 w-full">
+                        <SelectPrimitive.Value<ServerType>>
+                          {(state) => state.selectedOption()?.name || "Choose a server type"}
+                        </SelectPrimitive.Value>
+                      </SelectTrigger>
+                      <SelectContent />
+                    </Select>
                   </Show>
                   <Show when={selectedType()}>
                     <p class="text-xs text-muted-foreground">
@@ -232,28 +246,26 @@ export default function CreateServerPage() {
                     when={!versions.loading}
                     fallback={<div>Loading versions...</div>}
                   >
-                    <select
-                      id="version"
-                      name="version"
+                    <Select
+                      options={versions() || []}
                       value={selectedVersion()}
-                      onChange={(e) =>
-                        setSelectedVersion(e.currentTarget.value)
-                      }
-                      class="h-11 w-full rounded-4xl border border-input bg-input/30 px-3 py-1 text-base transition-colors outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                      onChange={(selected) => setSelectedVersion(selected || "")}
+                      placeholder={selectedTypeId() ? "Choose a version" : "Select a server type first"}
+                      itemComponent={(props) => (
+                        <SelectItem item={props.item}>
+                          {props.item.rawValue}
+                        </SelectItem>
+                      )}
                       disabled={!selectedTypeId()}
-                      required
                     >
-                      <option value="">
-                        {selectedTypeId()
-                          ? "Choose a version"
-                          : "Select a server type first"}
-                      </option>
-                      <For each={versions()}>
-                        {(version) => (
-                          <option value={version}>{version}</option>
-                        )}
-                      </For>
-                    </select>
+                      <Select.HiddenSelect name="version" required />
+                      <SelectTrigger class="h-11 w-full">
+                        <SelectPrimitive.Value<string>>
+                          {(state) => state.selectedOption() || (selectedTypeId() ? "Choose a version" : "Select a server type first")}
+                        </SelectPrimitive.Value>
+                      </SelectTrigger>
+                      <SelectContent />
+                    </Select>
                   </Show>
                 </div>
 

@@ -58,6 +58,23 @@ func (h *VersionsHandler) GetVersions(c fiber.Ctx) error {
 	})
 }
 
+func (h *VersionsHandler) GetServerTypes(c fiber.Ctx) error {
+	serverTypes := []fiber.Map{
+		{
+			"id":          models.ServerTypeVanilla,
+			"name":        "Vanilla",
+			"description": "Official Mojang Minecraft server",
+		},
+		{
+			"id":          models.ServerTypeFabric,
+			"name":        "Fabric",
+			"description": "Lightweight mod loader for Minecraft",
+		},
+	}
+
+	return c.JSON(serverTypes)
+}
+
 func compareVersions(a, b string) int {
 	aParts := strings.Split(a, ".")
 	bParts := strings.Split(b, ".")

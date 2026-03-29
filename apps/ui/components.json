@@ -1,5 +1,5 @@
 {
-	"$schema": "https://shadcn-solid.com/schema.json",
+	"$schema": "https://solid-ui.com/schema.json",
 	"style": "default",
 	"rsc": false,
 	"tsx": true,
