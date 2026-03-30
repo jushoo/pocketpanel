@@ -1,0 +1,9 @@
+{
+  "commands": {
+    "component": {
+      "description": "Generate and update Solid UI components",
+      "script": "commands/component.js",
+      "args": true
+    }
+  }
+}
