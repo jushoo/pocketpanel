@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 
 	"pocketpanel/api/internal/models"
 )
@@ -56,19 +57,32 @@ func (s *Syncer) syncServerType(serverType models.ServerType, fetcher UpstreamFe
 		return nil
 	}
 
+	// Deduplicate by version string (normalize the data)
+	// The unique constraint is on (server_type, version), so we need unique version strings
 	seen := make(map[string]bool)
 	deduped := make([]models.Version, 0, len(versions))
 	for _, v := range versions {
-		if !seen[v.Version] {
-			seen[v.Version] = true
-			deduped = append(deduped, v)
+		// Ensure ServerType is set correctly
+		v.ServerType = serverType
+
+		// Skip if we've already seen this version
+		if seen[v.Version] {
+			continue
 		}
+		seen[v.Version] = true
+		deduped = append(deduped, v)
 	}
 
 	return s.db.Transaction(func(tx *gorm.DB) error {
+		// Delete existing versions for this server type
 		if err := tx.Where("server_type = ?", serverType).Delete(&models.Version{}).Error; err != nil {
 			return err
 		}
-		return tx.Create(&deduped).Error
+
+		// Insert with conflict handling (skip duplicates if any slip through)
+		return tx.Clauses(clause.OnConflict{
+			Columns:   []clause.Column{{Name: "server_type"}, {Name: "version"}},
+			DoNothing: true,
+		}).Create(&deduped).Error
 	})
 }

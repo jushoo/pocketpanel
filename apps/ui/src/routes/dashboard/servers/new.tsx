@@ -9,6 +9,7 @@ import { createSignal, Show } from "solid-js";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
+import { ModeToggle } from "~/components/ModeToggle";
 import {
   Card,
   CardContent,
@@ -152,6 +153,9 @@ export default function CreateServerPage() {
               </p>
             </div>
           </div>
+          <div class="flex items-center gap-4">
+            <ModeToggle />
+          </div>
         </div>
       </header>
 
@@ -211,6 +215,7 @@ export default function CreateServerPage() {
                     <Combobox
                       options={serverTypes() || []}
                       optionValue="id"
+                      optionLabel="name"
                       optionTextValue="name"
                       placeholder="Choose a server type"
                       value={serverTypes()?.find((t: ServerType) => t.id === selectedTypeId()) || null}
@@ -295,7 +300,7 @@ export default function CreateServerPage() {
 
                 {/* Memory Allocation */}
                 <div class="space-y-3">
-                  <Label>Memory Allocation (GB)</Label>
+                  <Label>Memory Allocation (MB)</Label>
                   <div class="grid grid-cols-2 gap-4">
                     <div class="space-y-2">
                       <Label
@@ -308,9 +313,10 @@ export default function CreateServerPage() {
                         id="minMemory"
                         name="minMemory"
                         type="number"
-                        placeholder="2"
-                        min={1}
-                        defaultValue="2"
+                        placeholder="2048"
+                        min={512}
+                        max={131072}
+                        value="2048"
                         class="h-11"
                       />
                     </div>
@@ -325,14 +331,17 @@ export default function CreateServerPage() {
                         id="maxMemory"
                         name="maxMemory"
                         type="number"
-                        placeholder="4"
-                        min={1}
-                        max={128}
-                        defaultValue="4"
+                        placeholder="4096"
+                        min={512}
+                        max={131072}
+                        value="4096"
                         class="h-11"
                       />
                     </div>
                   </div>
+                  <p class="text-xs text-muted-foreground">
+                    Memory in megabytes. Example: 2048 MB = 2 GB, 4096 MB = 4 GB
+                  </p>
                 </div>
 
                 {/* Info Note */}

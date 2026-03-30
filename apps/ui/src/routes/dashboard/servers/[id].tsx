@@ -2,6 +2,7 @@ import { query, createAsync, redirect, useParams } from "@solidjs/router";
 import { Show } from "solid-js";
 import { Button } from "~/components/ui/button";
 import { Badge } from "~/components/ui/badge";
+import { ModeToggle } from "~/components/ModeToggle";
 import { ArrowLeft, Circle } from "lucide-solid";
 import { formatMemory } from "~/lib/utils";
 
@@ -58,6 +59,9 @@ export default function ServerDetailPage() {
               <ArrowLeft class="mr-2 h-4 w-4" />
               Back to servers
             </Button>
+          </div>
+          <div class="flex items-center gap-4">
+            <ModeToggle />
           </div>
         </div>
       </header>
