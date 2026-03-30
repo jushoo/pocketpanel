@@ -279,7 +279,7 @@ export default function CreateServerPage() {
                 </div>
 
                 {/* Divider */}
-                <div class="border-t"></div>
+                <div class="border-t" />
 
                 {/* Port */}
                 <div class="space-y-2">

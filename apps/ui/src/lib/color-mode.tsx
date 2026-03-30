@@ -52,7 +52,6 @@ export function ColorModeProvider(props: { children: JSX.Element }) {
   };
 
   createEffect(() => {
-    const mode = colorMode();
     const resolved = resolvedMode();
     
     // Apply class to html element

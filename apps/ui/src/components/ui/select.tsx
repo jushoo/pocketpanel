@@ -56,8 +56,10 @@ const SelectContent = (
   )
 }
 
+import type { SelectItemComponent } from "@kobalte/core/select"
+
 const SelectItem = (
-  props: { item: any; class?: string; children?: any }
+  props: { item: SelectItemComponent; class?: string; children?: JSX.Element }
 ) => {
   const [local, others] = splitProps(props, ["class", "children", "item"])
   return (

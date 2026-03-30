@@ -5,10 +5,14 @@
  * Copy this file and adapt it to your needs using one of the three patterns below.
  */
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import type { JSX, ValidComponent, Component, ComponentProps } from "solid-js"
 import { splitProps } from "solid-js"
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import type { VariantProps } from "class-variance-authority"
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { cva } from "class-variance-authority"
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import type { PolymorphicProps } from "@kobalte/core/polymorphic"
 
 import { cn } from "~/lib/utils"

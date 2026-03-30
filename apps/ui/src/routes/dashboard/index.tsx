@@ -1,4 +1,4 @@
-import { query, createAsync, useSubmission, action, redirect, useParams } from "@solidjs/router";
+import { query, createAsync, useSubmission, action, redirect } from "@solidjs/router";
 import { createSignal, Show, For } from "solid-js";
 import { Button } from "~/components/ui/button";
 import { Badge } from "~/components/ui/badge";

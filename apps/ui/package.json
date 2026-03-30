@@ -26,7 +26,13 @@
     "vite": "^7.0.0"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@tailwindcss/vite": "^4.0.7",
+    "@typescript-eslint/eslint-plugin": "^8.57.2",
+    "@typescript-eslint/parser": "^8.57.2",
+    "eslint": "^10.1.0",
+    "eslint-plugin-solid": "^0.14.5",
+    "globals": "^17.4.0",
     "tailwindcss": "^4.0.7",
     "typescript": "^6.0.2"
   },
