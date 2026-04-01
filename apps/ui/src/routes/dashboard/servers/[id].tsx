@@ -66,13 +66,18 @@ export default function ServerDetailPage() {
             {(s) => (
               <>
                 {/* Title */}
-                <div class="mb-8">
-                  <h1 class="text-xl font-medium text-foreground">
-                    {s().server.name}
-                  </h1>
-                  <p class="mt-1 text-sm text-muted-foreground">
-                    Server configuration and details
-                  </p>
+                <div class="flex flex-row justify-between mb-8">
+                  <div>
+                    <h1 class="text-xl font-medium text-foreground">
+                      {s().server.name}
+                    </h1>
+                    <p class="mt-1 text-sm text-muted-foreground">
+                      Server configuration and details
+                    </p>
+                  </div>
+                  <Button size="lg">
+                    Start
+                  </Button>
                 </div>
 
                 {/* Server Info - List Style */}
