@@ -6,12 +6,12 @@ This is a monorepo with a SolidStart frontend (Port 3000) and Go backend (Port 3
 
 ### Root Level
 ```bash
-make dev              # Start both dev servers
-make build            # Build production
-make test             # Run all tests
-make install          # Install dependencies
-make db-migrate       # Database migrations
-make clean            # Clean build artifacts
+just dev              # Start both dev servers
+just build            # Build production
+just test             # Run all tests
+just install          # Install dependencies
+just db-migrate       # Database migrations
+just clean            # Clean build artifacts
 ```
 
 ### Individual Apps

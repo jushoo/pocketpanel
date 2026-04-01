@@ -3,6 +3,8 @@ module pocketpanel/api
 go 1.26
 
 require (
+	github.com/go-co-op/gocron/v2 v2.19.1
+	github.com/go-playground/validator/v10 v10.30.1
 	github.com/gofiber/fiber/v3 v3.1.0
 	golang.org/x/crypto v0.48.0
 	gorm.io/driver/sqlite v1.5.7
@@ -10,13 +12,10 @@ require (
 )
 
 require (
-	github.com/DATA-DOG/go-sqlmock v1.5.2 // indirect
 	github.com/andybalholm/brotli v1.2.0 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.12 // indirect
-	github.com/go-co-op/gocron/v2 v2.19.1 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
-	github.com/go-playground/validator/v10 v10.30.1 // indirect
 	github.com/gofiber/schema v1.7.0 // indirect
 	github.com/gofiber/utils/v2 v2.0.2 // indirect
 	github.com/google/uuid v1.6.0 // indirect
